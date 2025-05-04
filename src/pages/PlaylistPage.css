@@ -1,0 +1,67 @@
+.playlist-page {
+  color: white;
+  padding: 20px;
+}
+
+.playlist-page-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.playlist-page-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+}
+
+.playlist-page-details {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.playlist-page-title {
+  font-size: 40px;
+  font-weight: bold;
+}
+
+.playlist-page-subtext {
+  margin: 0;
+  font-size: 18px;
+  color: #b3b3b3;
+}
+
+.playlist-page-meta {
+  font-size: 16px;
+  color: #b3b3b3;
+}
+
+.song-list-header {
+  margin-left: 0.5%;
+  display: grid;
+  grid-template-columns: 5% 40% 25% 15% 10%;
+  gap: 10px;
+  padding: 10px 0;
+  font-size: 16px;
+  font-weight: bold;
+  border-bottom: 1px solid gray;
+  text-align: left;
+}
+
+.song-list-header .plays {
+  text-align: right;
+  margin-left: auto;
+}
+
+.song-list-header .duration {
+  text-align: right;
+  margin-left: auto;
+}
+
+.divider {
+  margin: 20px 0;
+  border: none;
+  height: 1px;
+  background-color: #333;
+}

@@ -1,0 +1,31 @@
+.song-list {
+  width: 100%;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.song-row {
+  display: grid;
+  grid-template-columns: 5% 40% 25% 15% 10%;
+  gap: 10px;
+  padding: 10px;
+  border-bottom: 1px solid #333;
+  color: white;
+}
+
+.song-index {
+  text-align: left;
+}
+
+.song-title {
+  text-align: left;
+}
+
+.song-artist {
+  text-align: left;
+}
+
+.song-plays,
+.song-duration {
+  text-align: right;
+}

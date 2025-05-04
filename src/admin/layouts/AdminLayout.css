@@ -1,0 +1,44 @@
+.admin-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.admin-header {
+  background-color: #1db954;
+  color: white;
+  padding: 16px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.admin-body {
+  display: flex;
+  flex: 1;
+}
+
+.admin-sidebar {
+  width: 200px;
+  background-color: #333;
+  color: white;
+  padding: 20px;
+}
+
+.admin-sidebar a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+
+.admin-sidebar a:hover {
+  text-decoration: underline;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 20px;
+  background-color: #f9f9f9;
+  overflow-y: auto;
+}

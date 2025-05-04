@@ -1,0 +1,41 @@
+.rhap_container {
+  background: #000000 !important;
+  max-width: 30%;
+  margin: auto;
+  justify-content: flex-start;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.rhap_progress-bar {
+  background-color: #444; /* Dark grey */
+}
+
+.rhap_progress-filled {
+  background-color: #1db954 !important; /* Spotify green */
+}
+
+/* Change the play/pause button size */
+.rhap_main-controls button {
+  font-size: 30px !important;
+}
+
+.rhap_play-pause-button,
+.rhap_skip-button {
+  width: 30px; /* Adjust button size */
+  height: 30px;
+}
+
+/* Style the volume control */
+.rhap_volume-bar {
+  background-color: #555;
+}
+
+.rhap_volume-bar .rhap_volume-indicator {
+  background-color: #1db954 !important;
+}
+
+/* Hide the default download button if needed */
+.rhap_download-progress {
+  display: none !important;
+}

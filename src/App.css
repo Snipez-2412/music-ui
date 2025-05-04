@@ -1,0 +1,69 @@
+@font-face {
+  font-family: "Spotify Circular";
+  src: url("/font/CircularSpotifyText-Book.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  font-family: "Spotify Circular", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+  margin: 0;
+  overflow: hidden;
+  background-color: #000;
+  color: #fff;
+}
+
+a {
+  text-decoration: none;
+  color: #fff;
+}
+
+.navbar {
+  background-color: #000;
+  height: 60px;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.main {
+  display: flex;
+  height: calc(100vh - 70px - 120px);
+  padding: 0.5rem;
+  margin-top: 60px;
+}
+
+.sidebar {
+  background-color: #121212;
+  width: 340px;
+  border-radius: 1rem;
+  margin-right: 0.5rem;
+}
+
+.main-content {
+  background-color: #121212;
+  flex-grow: 1;
+  border-radius: 1rem;
+  overflow: auto;
+  padding: 0 1.5rem;
+  min-width: 0;
+}
+
+.music-player {
+  background-color: black;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 90px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

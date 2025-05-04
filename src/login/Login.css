@@ -1,0 +1,45 @@
+/* Spotify colors */
+:root {
+  --spotify-green: #1db954;
+  --spotify-black: #191414;
+  --spotify-white: #ffffff;
+}
+
+/* Global styles */
+body {
+  background-color: var(--spotify-black);
+  color: var(--spotify-white);
+}
+
+/* Button styles */
+.MuiButton-root {
+  background-color: var(--spotify-green);
+  color: var(--spotify-white);
+}
+
+.MuiButton-root:hover {
+  background-color: #1ed760;
+}
+
+/* Input styles */
+.MuiInputBase-root {
+  color: var(--spotify-white);
+}
+
+.MuiInputBase-input {
+  background-color: #333;
+  padding: 12px;
+  border-radius: 4px;
+}
+
+/* Form Control Styles */
+.MuiFormControl-root {
+  background-color: var(--spotify-black);
+  border-radius: 8px;
+}
+
+/* Paper styles for SignInPage */
+.MuiPaper-root {
+  background-color: var(--spotify-black);
+  color: var(--spotify-white);
+}
