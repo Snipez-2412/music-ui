@@ -36,10 +36,20 @@ export const useLyricsStore = create((set, get) => ({
 
   editLyrics: async (songId, newContent) => {
     try {
-      const updated = await updateLyrics(songId, newContent);
-      set({ lyrics: updated });
+      const currentLyrics = get().lyrics; // Get the current lyrics from the store
+      if (currentLyrics) {
+        // If lyrics exist, update them
+        const updated = await updateLyrics(songId, newContent);
+        console.log("Updated lyrics:", updated);
+        set({ lyrics: updated });
+      } else {
+        // If no lyrics exist, add them
+        const added = await addLyrics(songId, { content: newContent });
+        console.log("Added lyrics:", added);
+        set({ lyrics: added });
+      }
     } catch (err) {
-      console.error("Failed to update lyrics", err);
+      console.error("Failed to update or add lyrics", err);
     }
   },
 

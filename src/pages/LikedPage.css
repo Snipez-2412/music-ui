@@ -1,0 +1,62 @@
+.liked-page {
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+}
+
+.liked-page-info {
+  background: linear-gradient(
+    135deg,
+    #450af5,
+    #c4efd9
+  ); /* Add gradient background */
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+  /* Fade bottom using mask */
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+}
+
+.liked-page-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.liked-page-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.liked-page-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.liked-page-meta {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 10px;
+}
+
+.song-list-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.divider {
+  border: none;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin: 10px 0;
+}

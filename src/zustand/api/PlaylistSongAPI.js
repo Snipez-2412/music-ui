@@ -8,7 +8,7 @@ const BASE_URL = "http://localhost:8080/playlist-songs";
 export const fetchSongsInPlaylist = async (playlistId) => {
   const res = await fetch(`${BASE_URL}/${playlistId}`, {
     method: "GET",
-    credentials: 'include', // Ensures that cookies/session are included in the request
+    credentials: 'include',
   });
 
   if (!res.ok) throw new Error("Failed to fetch songs in playlist");

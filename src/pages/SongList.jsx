@@ -5,17 +5,19 @@ import "./SongList.css";
 import useMusicPlayerStore from "../zustand/store/musicPlayerStore";
 import { useLikeStore } from "../zustand/store/LikeStore";
 import { useLyricsStore } from "../zustand/store/LyricsStore";
+import { useUserStore } from "../zustand/store/UserStore";
 
-function SongList({ songs, userId }) {
+function SongList({ songs }) {
   const { updateSongs, setCurrentSong } = useMusicPlayerStore();
   const { likes, addLike, removeLike } = useLikeStore();
   const { lyrics, loadLyrics } = useLyricsStore();
+  const currentUser = useUserStore((state) => state.currentUser);
 
   const [isLyricsModalVisible, setIsLyricsModalVisible] = useState(false);
   const [currentLyrics, setCurrentLyrics] = useState([]);
 
   useEffect(() => {
-    console.log("Songs passed to SongList:", songs); // Debug log
+    console.log("Songs passed to SongList:", songs);
     updateSongs(songs);
   }, [songs, updateSongs]);
 
@@ -24,20 +26,34 @@ function SongList({ songs, userId }) {
   };
 
   const handleLike = async (songId) => {
+    if (!currentUser?.userID) {
+      console.error("User ID is not available");
+      return;
+    }
+
     if (likes.includes(songId)) {
-      await removeLike(userId, songId);
+      await removeLike(currentUser.userID, songId);
     } else {
-      await addLike(userId, songId);
+      await addLike(currentUser.userID, songId);
     }
   };
 
   const handleViewLyrics = async (songId) => {
-    await loadLyrics(songId);
-    const rawLyrics = lyrics || "No lyrics available.";
-    const formattedLyrics = rawLyrics.replace(/\\n/g, "\n").split("\n"); // Replace \\n with \n and split
-    setCurrentLyrics(formattedLyrics);
-    console.log("Formatted Lyrics:", formattedLyrics); // Debug log
-    setIsLyricsModalVisible(true);
+    try {
+      await loadLyrics(songId); // Wait for lyrics to load
+      const rawLyrics = lyrics || "No lyrics available.";
+      const formattedLyrics = rawLyrics.replace(/\\n/g, "\n").split("\n");
+      setCurrentLyrics(formattedLyrics);
+      console.log("Formatted Lyrics:", formattedLyrics);
+      setIsLyricsModalVisible(true); // Open the modal after lyrics are loaded
+    } catch (error) {
+      console.error("Failed to load lyrics:", error);
+    }
+  };
+
+  const handleCloseLyricsModal = () => {
+    setIsLyricsModalVisible(false);
+    setCurrentLyrics([]); // Clear the lyrics when the modal is closed
   };
 
   const renderMenu = (song) => (
@@ -69,12 +85,14 @@ function SongList({ songs, userId }) {
       <Modal
         title="Song Lyrics"
         visible={isLyricsModalVisible}
-        onCancel={() => setIsLyricsModalVisible(false)}
+        onCancel={handleCloseLyricsModal}
         footer={null}
       >
-        {currentLyrics.map((line, index) => (
-          <p key={index}>{line}</p> // Render each line as a separate paragraph
-        ))}
+        {currentLyrics.length > 0 ? (
+          currentLyrics.map((line, index) => <p key={index}>{line}</p>)
+        ) : (
+          <p>No lyrics available.</p>
+        )}
       </Modal>
     </div>
   );

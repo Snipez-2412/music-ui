@@ -1,17 +1,50 @@
 import React, { useEffect, useState } from "react";
-import { List, Dropdown, Menu, Button, Modal, Form, Input } from "antd";
+import { List, Dropdown, Menu, Button, Modal, Form, Input, Select } from "antd";
 import { EllipsisOutlined, ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { useUserStore } from "../../zustand/store/UserStore";
+
+const { Option } = Select;
+const { Search } = Input;
 
 function ManageUsers() {
   const { users, fetchUsers, updateUser, removeUser, addUser } = useUserStore();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [form] = Form.useForm();
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [selectedRole, setSelectedRole] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  useEffect(() => {
+    let filtered = users;
+
+    // Filter by role
+    if (selectedRole) {
+      filtered = filtered.filter((user) => user.roles.includes(selectedRole));
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter((user) =>
+        user.username.toLowerCase().includes(lowerCaseQuery)
+      );
+    }
+
+    setFilteredUsers(filtered);
+  }, [users, selectedRole, searchQuery]);
+
+  const handleRoleFilterChange = (value) => {
+    setSelectedRole(value);
+  };
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+  };
 
   const handleDelete = (id) => {
     Modal.confirm({
@@ -27,7 +60,11 @@ function ManageUsers() {
 
   const handleEdit = (user) => {
     setEditingUser(user);
-    form.setFieldsValue(user);
+    form.setFieldsValue({
+      username: user.username,
+      email: user.email,
+      role: user.roles,
+    });
     setIsModalVisible(true);
   };
 
@@ -66,6 +103,30 @@ function ManageUsers() {
   return (
     <div>
       <h1>Manage Users</h1>
+
+      {/* Search Bar */}
+      <div style={{ marginBottom: "16px" }}>
+        <Search
+          placeholder="Search by username"
+          allowClear
+          onSearch={handleSearch}
+          style={{ width: "100%" }}
+        />
+      </div>
+
+      {/* Role Filter */}
+      <div style={{ marginBottom: "16px" }}>
+        <Select
+          placeholder="Filter by Role"
+          allowClear
+          onChange={handleRoleFilterChange}
+          style={{ width: 200 }}
+        >
+          <Option value="ROLE_ADMIN">Admin</Option>
+          <Option value="ROLE_USER">User</Option>
+        </Select>
+      </div>
+
       <Button
         type="primary"
         icon={<PlusOutlined />}
@@ -75,7 +136,7 @@ function ManageUsers() {
         Add User
       </Button>
       <List
-        dataSource={users}
+        dataSource={filteredUsers}
         renderItem={(user) => (
           <List.Item
             actions={[
@@ -86,10 +147,18 @@ function ManageUsers() {
           >
             <List.Item.Meta
               title={user.username}
-              description={`Email: ${user.email}`}
+              description={`Role: ${user.roles
+                .map((role) => (role === "ROLE_ADMIN" ? "Admin" : "User"))
+                .join(", ")}`}
             />
           </List.Item>
         )}
+        style={{
+          maxHeight: "400px",
+          overflowY: "auto",
+          border: "1px solid #f0f0f0",
+          padding: "8px",
+        }}
       />
 
       {/* Add/Edit User Modal */}
@@ -113,7 +182,7 @@ function ManageUsers() {
             name="email"
             label="Email"
             rules={[
-              { required: true, message: "Please enter the email" },
+              { required: false, message: "Please enter the email" },
               { type: "email", message: "Please enter a valid email" },
             ]}
           >
@@ -122,9 +191,12 @@ function ManageUsers() {
           <Form.Item
             name="role"
             label="Role"
-            rules={[{ required: true, message: "Please enter the role" }]}
+            rules={[{ required: true, message: "Please select a role" }]}
           >
-            <Input />
+            <Select placeholder="Select a role">
+              <Option value="ROLE_ADMIN">Admin</Option>
+              <Option value="ROLE_USER">User</Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

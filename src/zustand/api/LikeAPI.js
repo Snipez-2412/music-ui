@@ -7,7 +7,7 @@ export const getLikedSongs = async (userId) => {
 };
 
 export const likeSong = async (userId, songId) => {
-  const res = await fetch(`${API_BASE}/like/${userId}/song/${songId}`, {
+  const res = await fetch(`${API_BASE}/like/user/${userId}/song/${songId}`, {
     method: "POST",
   });
   if (!res.ok) throw new Error(await res.text());
@@ -15,7 +15,7 @@ export const likeSong = async (userId, songId) => {
 };
 
 export const unlikeSong = async (userId, songId) => {
-  const res = await fetch(`${API_BASE}/unlike/${userId}/songs/${songId}`, {
+  const res = await fetch(`${API_BASE}/unlike/user/${userId}/songs/${songId}`, {
     method: "DELETE",
   });
   if (!res.ok) throw new Error(await res.text());

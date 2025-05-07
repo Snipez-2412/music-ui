@@ -36,31 +36,44 @@ const useSongStore = create((set, get) => ({
     }
   },
 
-  addSong: async (song, image = null) => {
+  addSong: async (songData, coverFile, audioFile) => {
     try {
-      const newSong = await songAPI.addSong(song, image);
-      set({ songs: [...get().songs, newSong] });
+      console.log("Adding song in store:", songData, coverFile, audioFile);
+      const newSong = await songAPI.addSong(songData, coverFile, audioFile);
+      set((state) => ({
+        songs: [...state.songs, newSong], // Add the new song to the state
+      }));
+
       return newSong;
     } catch (error) {
+      console.error("Failed to add song in store:", error);
       set({ error: error.message });
       return null;
     }
   },
 
-  updateSong: async (id, song) => {
+  updateSong: async (songData, coverFile, audioFile) => {
     try {
-      const updatedSong = await songAPI.updateSong(id, song);
-      const updatedList = get().songs.map((s) =>
-        s.songID === updatedSong.songID ? updatedSong : s
-      );
-      set({ songs: updatedList });
-      return updatedSong;
+      console.log("Updating song in store:", songData, coverFile, audioFile);
+      const updatedSong = await songAPI.updateSong(songData, coverFile, audioFile); // Pass files to the API
+
+      // Update the song in the state
+      set((state) => {
+        const updatedSongs = state.songs.map((song) =>
+          song.songID === updatedSong.songID ? updatedSong : song
+        );
+        console.log("Updated songs in state:", updatedSongs);
+        return { songs: updatedSongs };
+      });
+
+      return updatedSong; // Return the updated song
     } catch (error) {
+      console.error("Failed to update song in store:", error);
       set({ error: error.message });
       return null;
     }
   },
-
+  
   deleteSong: async (id) => {
     try {
       await songAPI.deleteSong(id);

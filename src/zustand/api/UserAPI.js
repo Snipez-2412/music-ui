@@ -132,4 +132,22 @@ export const deleteUser = async (id) => {
   }
 };
 
+/**
+ * Fetch the currently authenticated user
+ * @returns {Promise<User>}
+ */
+export const fetchCurrentUser = async () => {
+  const res = await fetch(`${BASE_URL}/current-user`, {
+    method: "GET",
+    credentials: "include", 
+  });
+  if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error("Unauthorized: No active session");
+    }
+    throw new Error("Failed to fetch current user");
+  }
+  return res.json();
+};
+
 

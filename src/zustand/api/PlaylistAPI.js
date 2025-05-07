@@ -92,9 +92,6 @@ export const addPlaylist = async (playlist, image = null) => {
 
   const res = await fetch(BASE_URL, {
     method: "POST",
-    headers: {
-      // No token needed here as the session will handle authentication
-    },
     credentials: 'include', 
     body: formData,
   });

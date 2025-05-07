@@ -45,21 +45,34 @@ export const fetchSongsByAlbumId = async (albumId) => {
 };
 
 /**
- * Add a new song with optional image
- * @param {Object} song - The song metadata
- * @param {File|null} image - Optional image file
+ * Add a new song with optional image and audio file
+ * @param {Object} songData - The song metadata
+ * @param {File|null} coverFile - Optional cover image file
+ * @param {File} audioFile - Required audio file
  * @returns {Promise<Object>} The created song
  */
-export const addSong = async (song, image = null) => {
+export const addSong = async (songData, coverFile, audioFile) => {
   const formData = new FormData();
-  formData.append("song", new Blob([JSON.stringify(song)], { type: "application/json" }));
-  if (image) {
-    formData.append("image", image);
+
+  formData.append(
+    "song",
+    new Blob([JSON.stringify(songData)], {
+      type: "application/json",
+    })
+  );
+  if (coverFile) {
+    formData.append("cover", coverFile);
   }
+  if (audioFile) {
+    formData.append("audio", audioFile);
+  }
+
+  console.log("FormData:", formData.get("song"), formData.get("cover"), formData.get("audio"));
 
   const res = await fetch(BASE_URL, {
     method: "POST",
-    body: formData,
+    body: formData, 
+    credentials: "include",
   });
 
   if (!res.ok) throw new Error("Failed to add song");
@@ -67,18 +80,33 @@ export const addSong = async (song, image = null) => {
 };
 
 /**
- * Update a song
- * @param {number} id - Song ID
- * @param {Object} song - The updated song data
+ * Update an existing song with optional image and audio file
+ * @param {Object} songData - The song metadata
+ * @param {File|null} coverFile - Optional cover image file
+ * @param {File|null} audioFile - Optional audio file
  * @returns {Promise<Object>} The updated song
  */
-export const updateSong = async (id, song) => {
-  const res = await fetch(`${BASE_URL}/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(song),
+export const updateSong = async (songData, coverFile, audioFile) => {
+  const formData = new FormData();
+  formData.append(
+    "song",
+    new Blob([JSON.stringify(songData)], {
+      type: "application/json",
+    })
+  );
+  if (coverFile) {
+    formData.append("cover", coverFile);
+  }
+  if (audioFile) {
+    formData.append("audio", audioFile);
+  }
+
+  console.log("FormData for update:", formData.get("song"), formData.get("cover"), formData.get("audio"));
+
+  const res = await fetch(`${BASE_URL}`, {
+    method: "PUT", 
+    body: formData,
+    credentials: "include",
   });
 
   if (!res.ok) throw new Error("Failed to update song");

@@ -1,11 +1,10 @@
-// login/CombinedSignInPage.jsx
 import React from 'react';
 import { AppProvider } from '@toolpad/core/AppProvider';
 import { SignInPage } from '@toolpad/core/SignInPage';
 import { useUserStore } from "../zustand/store/UserStore";
 import { useTheme, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
-import { useNavigate } from "react-router-dom"; // <-- import useNavigate
+import { useNavigate, Link } from "react-router-dom"; // Import Link for navigation
 
 // Spotify colors
 const spotifyColors = {
@@ -15,23 +14,22 @@ const spotifyColors = {
 };
 
 const providers = [
-  { id: 'credentials', name: 'Email and password' },
+  { id: 'credentials', name: 'Username and password' }, // Updated to say "Username and password"
   { id: 'google', name: 'Google' },
   { id: 'facebook', name: 'Facebook' },
   { id: 'twitter', name: 'Twitter' },
 ];
 
-// Move signIn inside the component to access navigate
 function CombinedSignInPage() {
-  const navigate = useNavigate(); // <-- useNavigate here
+  const navigate = useNavigate();
 
   const signIn = async (provider, formData) => {
     if (provider.id === 'credentials') {
-      const username = formData?.get('email');
+      const username = formData?.get('email'); // Updated to use "username" instead of "email"
       const password = formData?.get('password');
 
       const urlEncodedBody = new URLSearchParams();
-      urlEncodedBody.append('username', username);
+      urlEncodedBody.append('username', username); // Updated to send "username"
       urlEncodedBody.append('password', password);
 
       try {
@@ -48,16 +46,16 @@ function CombinedSignInPage() {
           throw new Error('Incorrect username or password.');
         }
 
-        if (response.ok) {
-          const fetchCurrentUser = useUserStore.getState().fetchCurrentUser;
-          await fetchCurrentUser();
+        // Fetch the current user after successful login
+        const fetchCurrentUser = useUserStore.getState().restoreUserFromSession;
+        await fetchCurrentUser();
 
-          console.log("Stored user:", useUserStore.getState().currentUser);
+        console.log("Stored user:", useUserStore.getState().currentUser);
 
-          navigate('/'); 
-          return { type: 'CredentialsSignin' };
-        }
+        navigate('/'); // Redirect to the home page
+        return { type: 'CredentialsSignin' };
       } catch (error) {
+        console.error("Login error:", error.message);
         return { type: 'CredentialsSignin', error: error.message };
       }
     }
@@ -109,10 +107,16 @@ function CombinedSignInPage() {
         providers={providers}
         signIn={signIn}
         slotProps={{
-          emailField: { autoFocus: true },
+          emailField: { label: 'Username', autoFocus: true }, // Updated label to "Username"
           form: { noValidate: true },
         }}
       />
+      {/* Add the signup link manually below the SignInPage */}
+      <div style={{ textAlign: 'center', marginTop: '-10%' }}>
+        <p style={{ color: spotifyColors.text }}>
+          Don't have an account? <Link to="/signup" style={{ color: spotifyColors.primary }}>Sign up</Link>
+        </p>
+      </div>
     </AppProvider>
   );
 }

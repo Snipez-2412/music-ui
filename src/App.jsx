@@ -1,17 +1,10 @@
 // App.jsx
 import React, { useEffect } from "react";
 import '@ant-design/v5-patch-for-react-19';
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Outlet,
-} from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom"; // Import useLocation
 import "./main/main.css";
 
-import Navbar from "./main/Navbar";
-import Sidebar from "./main/Sidebar";
-import MainContent from "./main/MainContent";
+import MainPage from "./main/MainPage";
 import MusicPlayer from "./main/MusicPlayer";
 
 import HomePage from "./pages/HomePage";
@@ -20,6 +13,7 @@ import CreatePlaylist from "./pages/CreatePlaylist";
 import UpdatePlaylistPage from "./pages/UpdatePlaylistPage";
 import AlbumPage from "./Pages/AlbumPage";
 import SearchResultsPage from "./pages/SearchResultsPage";
+import LikedPage from "./pages/LikedPage";
 
 import AdminLayout from "./admin/layouts/AdminLayout";
 import ManageSongs from "./admin/pages/ManageSongs";
@@ -33,10 +27,24 @@ import SignUp from "./login/signup";
 import { useUserStore } from "./zustand/store/UserStore";
 
 function App() {
-  const restoreUser = useUserStore((state) => state.restoreUserFromToken);
+  const restoreUser = useUserStore((state) => state.restoreUserFromSession);
+  const location = useLocation(); // Get the current route location
+
+  useEffect(() => {
+    restoreUser();
+  }, [restoreUser]);
+
+  // Check if the current route is under /admin, /login, or /signup
+  const isExcludedRoute =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/login") ||
+    location.pathname.startsWith("/signup");
 
   return (
-    <Router>
+    <div className="app">
+      {/* Conditionally render MusicPlayer */}
+      {!isExcludedRoute && <MusicPlayer />}
+
       <Routes>
         {/* Main */}
         <Route path="/" element={<MainPage />}>
@@ -46,6 +54,7 @@ function App() {
           <Route path="/create-playlist" element={<CreatePlaylist />} />
           <Route path="update-playlist/:id" element={<UpdatePlaylistPage />} />
           <Route path="playlist/:name" element={<PlaylistPage />} />
+          <Route path="liked-page" element={<LikedPage />} />
         </Route>
         {/* Admin */}
         <Route path="/admin" element={<AdminLayout />}>
@@ -58,19 +67,6 @@ function App() {
         <Route path="/login" element={<CombinedSignInPage />} />
         <Route path="/signup" element={<SignUp />} />
       </Routes>
-    </Router>
-  );
-}
-
-function MainPage() {
-  return (
-    <div className="main">
-      <Navbar />
-      <Sidebar />
-      <MainContent>
-        <Outlet />
-      </MainContent>
-      <MusicPlayer />
     </div>
   );
 }

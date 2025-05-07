@@ -55,30 +55,20 @@ export const usePlaylistStore = create((set, get) => ({
   createPlaylist: async (playlist, image) => {
     set({ loading: true, error: null });
     try {
-      // Get the username from the JWT token using UserStore
-      const getUsernameFromToken = useUserStore.getState().getUsernameFromToken; // Access getUsernameFromToken from UserStore
-      const username = getUsernameFromToken(); // Retrieve the username from the token
+      // Get the current user from UserStore
+      const currentUser = useUserStore.getState().currentUser;
 
-      if (!username) {
-        throw new Error("Failed to retrieve username from token");
+      if (!currentUser || !currentUser.userID) {
+        throw new Error("Failed to retrieve current user or user ID");
       }
 
-      // Fetch user data by username from UserStore
-      const fetchUserByUsername = useUserStore.getState().fetchUserByUsername; // Access fetchUserByUsername from UserStore
-      await fetchUserByUsername(username); // Fetch user data by username
-      const user = useUserStore.getState().currentUser; // Retrieve the current user from UserStore
-
-      if (!user || !user.userID) {
-        throw new Error("Failed to retrieve user data for the given username");
-      }
-
-      console.log("User ID:", user.userID);
+      console.log("User ID:", currentUser.userID);
       console.log("Playlist data:", playlist);
 
       // Add userId to the playlist payload
       const playlistWithUserId = {
         ...playlist,
-        userId: user.userID, // Add userId to the payload
+        userId: currentUser.userID, // Add userId to the payload
       };
 
       // Call the API to create the playlist

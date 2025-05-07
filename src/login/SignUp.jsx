@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import "./Signup.css";
 
 function SignUp() {
@@ -8,40 +9,28 @@ function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [usernameError, setUsernameError] = useState("");
-  const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [signupError, setSignupError] = useState("");
 
-  // Simulate existing registered users
-  const existingUsernames = ["user1", "admin", "johnDoe"];
+  const navigate = useNavigate(); // Initialize navigate
 
   const validateUsername = () => {
     if (!username.trim()) {
       setUsernameError("Username cannot be empty.");
-    } else if (existingUsernames.includes(username)) {
-      setUsernameError("Username already exists.");
     } else {
       setUsernameError("");
     }
   };
 
-  const validateEmail = () => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-    if (!email.trim()) {
-      setEmailError("Email cannot be empty.");
-    } else if (!emailRegex.test(email)) {
-      setEmailError("Invalid email format (must be @gmail.com).");
-    } else {
-      setEmailError("");
-    }
-  };
-
   const validatePassword = () => {
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/; // Updated regex: 1 uppercase, 1 number
     if (!password) {
       setPasswordError("Password cannot be empty.");
     } else if (!passwordRegex.test(password)) {
-      setPasswordError("Password must be at least 8 characters, include 1 uppercase letter, 1 number, and 1 special character.");
+      setPasswordError(
+        "Password must include at least 1 uppercase letter and 1 number."
+      );
     } else {
       setPasswordError("");
     }
@@ -57,18 +46,41 @@ function SignUp() {
     }
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     validateUsername();
-    validateEmail();
     validatePassword();
     validateConfirmPassword();
 
-    if (usernameError || emailError || passwordError || confirmPasswordError) {
+    if (usernameError || passwordError || confirmPasswordError) {
       return;
     }
 
-    alert("Sign-up successful!");
-    window.location.href = "login.html";
+    try {
+      const response = await fetch("http://localhost:8080/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          email: email || null, // Make email optional
+          password,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+
+      const createdUser = await response.json();
+      alert("Sign-up successful!");
+      console.log("Created user:", createdUser);
+      navigate("/login"); // Use navigate to redirect to the login page
+    } catch (error) {
+      console.error("Signup failed:", error);
+      setSignupError(error.message);
+    }
   };
 
   return (
@@ -90,12 +102,10 @@ function SignUp() {
           <input
             type="email"
             id="email"
-            placeholder="Email"
+            placeholder="Email (optional)"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            onBlur={validateEmail}
           />
-          {emailError && <p className="error-message">{emailError}</p>}
         </div>
         <div className="input-group">
           <input
@@ -107,7 +117,8 @@ function SignUp() {
             onBlur={validatePassword}
           />
           <p className="note">
-            Password must be at least 8 characters, include 1 uppercase letter, 1 number, and 1 special character.
+            Password must be at least 8 characters, include 1 uppercase letter,
+            1 number, and 1 special character.
           </p>
           {passwordError && <p className="error-message">{passwordError}</p>}
         </div>
@@ -120,14 +131,17 @@ function SignUp() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             onBlur={validateConfirmPassword}
           />
-          {confirmPasswordError && <p className="error-message">{confirmPasswordError}</p>}
+          {confirmPasswordError && (
+            <p className="error-message">{confirmPasswordError}</p>
+          )}
         </div>
+        {signupError && <p className="error-message">{signupError}</p>}
         <button className="signup-btn" onClick={handleSignUp}>
           Sign Up
         </button>
         <div className="login">
           <p>
-            Already have an account? <a href="login.html">Log in</a>
+            Already have an account? <a href="/login">Log in</a>
           </p>
         </div>
       </div>

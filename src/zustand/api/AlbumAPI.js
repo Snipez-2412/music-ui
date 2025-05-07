@@ -41,11 +41,19 @@ export const fetchAlbumByTitle = async (title) => {
  * @param {Album} album
  * @returns {Promise<Album>}
  */
-export const addAlbum = async (album) => {
-  const response = await fetch(`${BASE_URL}/add`, {
+export const addAlbum = async (album, coverImage) => {
+  const formData = new FormData();
+  formData.append(
+    "album",
+    new Blob([JSON.stringify(album)], {
+      type: "application/json",
+    })
+  );
+  formData.append("image", coverImage);
+
+  const response = await fetch(`${BASE_URL}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(album),
+    body: formData,
   });
   if (!response.ok) throw new Error("Failed to add album");
   return response.json();
@@ -57,14 +65,19 @@ export const addAlbum = async (album) => {
  * @returns {Promise<Album>}
  */
 export const updateAlbum = async (album) => {
-  const response = await fetch(`${BASE_URL}/update`, {
+  const response = await fetch(`${BASE_URL}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(album),
+    credentials: "include",
   });
+
   if (!response.ok) throw new Error("Failed to update album");
+  
+  // Return the updated album response
   return response.json();
 };
+
 
 /**
  * Delete an album by ID
@@ -72,8 +85,10 @@ export const updateAlbum = async (album) => {
  * @returns {Promise<void>}
  */
 export const deleteAlbum = async (id) => {
-  const response = await fetch(`${BASE_URL}/delete/${id}`, {
+  const response = await fetch(`${BASE_URL}/${id}`, {
     method: "DELETE",
   });
   if (!response.ok) throw new Error("Failed to delete album");
 };
+
+

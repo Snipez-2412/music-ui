@@ -11,7 +11,7 @@ export const addLyrics = async (songId, content) => {
   const res = await fetch(`${API_BASE}/add/${songId}`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "text/plain",
     },
     body: JSON.stringify(content),
   });
@@ -23,7 +23,7 @@ export const updateLyrics = async (songId, newContent) => {
   const res = await fetch(`${API_BASE}/update/${songId}`, {
     method: "PUT",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "text/plain",
     },
     body: JSON.stringify(newContent),
   });

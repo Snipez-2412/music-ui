@@ -15,14 +15,17 @@ const useMusicPlayerStore = create((set, get) => ({
   // Actions
   togglePlay: () => {
     const { isPlaying, audioRef } = get();
-    const audioElement = audioRef?.audio?.current; // Access the actual <audio> element
-    if (audioElement) {
-      if (audioElement.paused) {
-        audioElement.play();
-        set({ isPlaying: true });
-      } else {
-        audioElement.pause();
+    if (audioRef) {
+      if (isPlaying) {
+        audioRef.pause();
         set({ isPlaying: false });
+        console.log("Paused playback");
+      } else {
+        audioRef.play().catch((error) => {
+          console.error("Failed to play audio:", error);
+        });
+        set({ isPlaying: true });
+        console.log("Started playback");
       }
     } else {
       console.error("Audio element not found or not initialized yet");
@@ -66,17 +69,17 @@ const useMusicPlayerStore = create((set, get) => ({
   nextSong: () => {
     const { currentSong, songs } = get();
     const currentIndex = songs.findIndex((song) => song.id === currentSong.id);
-    const nextIndex = (currentIndex + 1) % songs.length; // Loop back to the start
-    console.log("Next Song:", songs[nextIndex]);
+    const nextIndex = (currentIndex + 1) % songs.length; 
     set({ currentSong: songs[nextIndex] });
+    console.log("Next Song Index:", nextIndex);
   },
 
   previousSong: () => {
     const { currentSong, songs } = get();
     const currentIndex = songs.findIndex((song) => song.id === currentSong.id);
     const previousIndex = (currentIndex - 1 + songs.length) % songs.length; // Loop back to the end
-    console.log("Previous Song:", songs[previousIndex]);
     set({ currentSong: songs[previousIndex] });
+    console.log("Previous Song Index:", previousIndex);
   },
 
   setCurrentSong: (song) => {
@@ -84,7 +87,8 @@ const useMusicPlayerStore = create((set, get) => ({
     const index = songs.findIndex((s) => s.songID === song.songID);
     if (index !== -1) {
       set({ currentIndex: index, currentSong: song });
-      console.log("Current song set to:", song);
+      console.log("Playlist:", songs); // Log the entire playlist
+      console.log("Now playing:", song); // Log the current song
     } else {
       console.error("Song not found in the playlist:", song);
     }
@@ -97,6 +101,22 @@ const useMusicPlayerStore = create((set, get) => ({
   setAudioRef: (ref) => {
     console.log("Setting audioRef in Zustand store:", ref);
     set({ audioRef: ref });
+  },
+
+  resetPlaylist: (newSongs, songToPlay) => {
+    const index = newSongs.findIndex((song) => song.id === songToPlay.id);
+    if (index !== -1) {
+      set({
+        songs: newSongs, // Update the playlist
+        currentSong: songToPlay, // Set the new current song
+        currentIndex: index, // Update the index
+        isPlaying: true, // Start playing
+      });
+      console.log("Playlist reset with new songs:", newSongs);
+      console.log("Now playing:", songToPlay);
+    } else {
+      console.error("Song to play not found in the new playlist:", songToPlay);
+    }
   },
 }));
 

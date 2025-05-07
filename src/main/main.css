@@ -378,6 +378,40 @@ a:hover {
   margin: 0;
 }
 
+.liked-playlist {
+  display: flex;
+  align-items: center;
+  gap: 7px; /* Match the gap with other playlists */
+  width: 93%; /* Match the width of other playlists */
+  padding: 8px; /* Match the padding of other playlists */
+  border-radius: 8px; /* Match the border radius of other playlists */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.liked-playlist:hover {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.1
+  ); /* Match hover effect with other playlists */
+}
+
+.liked-playlist img {
+  width: 50px; /* Match the size of playlist images */
+  height: 50px; /* Match the size of playlist images */
+  object-fit: cover; /* Ensure the image fits properly */
+  border-radius: 8px; /* Match the border radius of playlist images */
+  flex-shrink: 0; /* Prevent the image from shrinking */
+}
+
+.liked-playlist span {
+  font-size: 16px; /* Match the font size of playlist titles */
+  font-weight: 400; /* Match the font weight of playlist titles */
+  color: white;
+}
+
 .icons {
   font-size: 1.25rem;
   display: flex;

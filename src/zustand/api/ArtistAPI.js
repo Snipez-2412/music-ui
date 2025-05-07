@@ -37,6 +37,7 @@ export const updateArtist = async (artist) => {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(artist),
+    credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to update artist");
   return res.json();

@@ -45,10 +45,16 @@ const useArtistStore = create((set) => ({
   updateArtist: async (artist) => {
     try {
       const updated = await artistAPI.updateArtist(artist);
-      set((state) => ({
-        artists: state.artists.map((a) => (a.id === updated.id ? updated : a)),
-        currentArtist: updated,
-      }));
+      console.log("Updated artist:", updated); // Debug log
+      set((state) => {
+        const updatedArtists = state.artists.map((a) =>
+          a.artistID === updated.artistID ? updated : a 
+        );
+        return {
+          artists: updatedArtists,
+          currentArtist: updated,
+        };
+      });
     } catch (error) {
       console.error("Failed to update artist:", error);
     }
@@ -66,6 +72,5 @@ const useArtistStore = create((set) => ({
     }
   },
 }));
-
 
 export default useArtistStore;

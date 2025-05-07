@@ -9,6 +9,16 @@ export const useUserStore = create((set) => ({
   setCurrentUser: (user) => set({ currentUser: user }),
   clearCurrentUser: () => set({ currentUser: null, currentUserId: null }),
 
+  restoreUserFromSession: async () => {
+    try {
+      const user = await userAPI.fetchCurrentUser();
+      set({ currentUser: user });
+    } catch (error) {
+      console.error("Failed to restore user from session:", error);
+      set({ currentUser: null });
+    }
+  },
+
   fetchUsers: async () => {
     try {
       const users = await userAPI.fetchAllUsers();
@@ -35,17 +45,6 @@ export const useUserStore = create((set) => ({
       console.error("Error fetching user by username:", error);
     }
   },
-
-
-fetchCurrentUser: async () => {
-  try {
-    const userId = await userAPI.fetchCurrentUserId();
-    const user = await userAPI.fetchUserById(userId);
-    set({ currentUser: user });
-  } catch (error) {
-    console.error("Error fetching current user:", error);
-  }
-},
 
   createUser: async (user, profilePic) => {
     try {

@@ -2,22 +2,55 @@ import React, { useEffect, useState } from "react";
 import { List, Dropdown, Menu, Button, Modal, Form, Input, Upload, Select } from "antd";
 import { EllipsisOutlined, ExclamationCircleOutlined, UploadOutlined } from "@ant-design/icons";
 import useAlbumStore from "../../zustand/store/AlbumStore";
-import useArtistStore from "../../zustand/store/ArtistStore"; // Import artist store
+import useArtistStore from "../../zustand/store/ArtistStore";
 
 const { Option } = Select;
+const { Search } = Input;
 
 function ManageAlbums() {
   const { albums, fetchAllAlbums, updateAlbum, deleteAlbum, addAlbum } = useAlbumStore();
-  const { artists, fetchAllArtists } = useArtistStore(); // Fetch artists for the dropdown
+  const { artists, fetchAllArtists } = useArtistStore();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingAlbum, setEditingAlbum] = useState(null);
   const [form] = Form.useForm();
   const [coverFile, setCoverFile] = useState(null);
+  const [filteredAlbums, setFilteredAlbums] = useState([]);
+  const [selectedArtist, setSelectedArtist] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchAllAlbums();
-    fetchAllArtists(); // Fetch artists when the component loads
+    fetchAllArtists();
   }, [fetchAllAlbums, fetchAllArtists]);
+
+  useEffect(() => {
+    let filtered = albums;
+
+    // Filter by artist
+    if (selectedArtist) {
+      filtered = filtered.filter((album) => album.artistID === selectedArtist);
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (album) =>
+          album.title.toLowerCase().includes(lowerCaseQuery) || // Match album title
+          album.artistName.toLowerCase().includes(lowerCaseQuery) // Match artist name
+      );
+    }
+
+    setFilteredAlbums(filtered);
+  }, [albums, selectedArtist, searchQuery]);
+
+  const handleArtistFilterChange = (value) => {
+    setSelectedArtist(value);
+  };
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+  };
 
   const handleDelete = (id) => {
     Modal.confirm({
@@ -34,20 +67,21 @@ function ManageAlbums() {
   const handleEdit = (album) => {
     setEditingAlbum(album);
     form.setFieldsValue(album);
-    setCoverFile(null); // Reset the cover file
+    setCoverFile(null);
     setIsModalVisible(true);
   };
 
   const handleAdd = () => {
     setEditingAlbum(null);
     form.resetFields();
-    setCoverFile(null); // Reset the cover file
+    setCoverFile(null);
     setIsModalVisible(true);
   };
 
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
+
       if (editingAlbum) {
         await updateAlbum({ ...editingAlbum, ...values }, coverFile);
       } else {
@@ -60,8 +94,10 @@ function ManageAlbums() {
     }
   };
 
-  const handleCoverChange = ({ file }) => {
-    setCoverFile(file.originFileObj);
+  const handleCoverChange = ({ fileList }) => {
+    const file = fileList[0]?.originFileObj;
+    console.log("Image file:", file);
+    setCoverFile(file);
   };
 
   const renderMenu = (album) => (
@@ -78,6 +114,33 @@ function ManageAlbums() {
   return (
     <div>
       <h1>Manage Albums</h1>
+
+      {/* Search Bar */}
+      <div style={{ marginBottom: "16px" }}>
+        <Search
+          placeholder="Search by album or artist"
+          allowClear
+          onSearch={handleSearch}
+          style={{ width: "100%" }}
+        />
+      </div>
+
+      {/* Artist Filter */}
+      <div style={{ marginBottom: "16px" }}>
+        <Select
+          placeholder="Filter by Artist"
+          allowClear
+          onChange={handleArtistFilterChange}
+          style={{ width: 200 }}
+        >
+          {artists.map((artist) => (
+            <Option key={artist.artistID} value={artist.artistID}>
+              {artist.name}
+            </Option>
+          ))}
+        </Select>
+      </div>
+
       <Button
         type="primary"
         icon={<UploadOutlined />}
@@ -87,7 +150,7 @@ function ManageAlbums() {
         Add Album
       </Button>
       <List
-        dataSource={albums}
+        dataSource={filteredAlbums}
         renderItem={(album) => (
           <List.Item
             actions={[
@@ -97,11 +160,24 @@ function ManageAlbums() {
             ]}
           >
             <List.Item.Meta
+              avatar={
+                <img
+                  src={album.signedCoverUrl}
+                  alt={album.title}
+                  style={{ width: 50, height: 50, borderRadius: 4 }}
+                />
+              }
               title={album.title}
               description={`Artist: ${album.artistName}`}
             />
           </List.Item>
         )}
+        style={{
+          maxHeight: "400px",
+          overflowY: "auto",
+          border: "1px solid #f0f0f0",
+          padding: "8px",
+        }}
       />
 
       {/* Add/Edit Album Modal */}
@@ -117,12 +193,12 @@ function ManageAlbums() {
           <Form.Item
             name="title"
             label="Album Title"
-            rules={[{ required: true, message: "Please enter the album title" }]}
+            rules={[{ required: false, message: "Please enter the album title" }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
-            name="artistName"
+            name="artistID"
             label="Artist Name"
             rules={[{ required: true, message: "Please select an artist" }]}
           >
@@ -135,7 +211,7 @@ function ManageAlbums() {
               }
             >
               {artists.map((artist) => (
-                <Option key={artist.id} value={artist.name}>
+                <Option key={artist.artistID} value={artist.artistID}>
                   {artist.name}
                 </Option>
               ))}
@@ -146,6 +222,7 @@ function ManageAlbums() {
               beforeUpload={() => false}
               onChange={handleCoverChange}
               maxCount={1}
+              accept="image/*"
             >
               <Button icon={<UploadOutlined />}>Upload Cover</Button>
             </Upload>

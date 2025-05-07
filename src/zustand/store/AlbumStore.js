@@ -35,9 +35,9 @@ const useAlbumStore = create((set, get) => {
       }
     },
 
-    addAlbum: async (album) => {
+    addAlbum: async (album, coverImage) => {
       try {
-        const newAlbum = await albumAPI.addAlbum(album);
+        const newAlbum = await albumAPI.addAlbum(album, coverImage);
         set({ albums: [...get().albums, newAlbum] });
         return newAlbum;
       } catch (error) {

@@ -1,24 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import libraryIcon from "../assets/library_icon.png";
+import likedIcon from "../assets/liked.jpg"; // Import the liked playlist image
 import Playlist from "./Playlist";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { usePlaylistStore } from "../zustand/store/PlaylistStore";
+import { useUserStore } from "../zustand/store/UserStore"; // Import UserStore
 
 function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [hoveredPlaylist, setHoveredPlaylist] = useState(null);
 
   const playlists = usePlaylistStore((state) => state.playlists);
-  
   const loadPlaylists = usePlaylistStore((state) => state.loadPlaylists);
+  const currentUser = useUserStore((state) => state.currentUser); // Get current user
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Tải playlists khi component được render lần đầu
-    loadPlaylists();
-  }, [loadPlaylists]);
+    if (currentUser) {
+      loadPlaylists(); // Load playlists only if the user is logged in
+    }
+  }, [loadPlaylists, currentUser]);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -33,6 +36,10 @@ function Sidebar() {
     navigate("/create-playlist");
   };
 
+  const goToLikedSongs = () => {
+    navigate("/liked-page"); // Navigate to the liked songs page
+  };
+
   return (
     <div className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
       <div className="library">
@@ -41,29 +48,48 @@ function Sidebar() {
             <img src={libraryIcon} alt="library_icon" />
             {!isCollapsed && <a href="#">Your library</a>}
           </div>
-          <div className="icons">
-            <i className="fa-solid fa-plus" onClick={handleCreatePlaylist}></i>
-          </div>
-        </div>
-
-        <div className="playlists">
-          {playlists.length > 0 ? (
-            playlists.map((playlist, index) => (
-              <Playlist
-                key={playlist.playlistID}
-                playlist={playlist}
-                index={index}
-                isCollapsed={isCollapsed}
-                isHovered={hoveredPlaylist === index}
-                onHover={() => setHoveredPlaylist(index)}
-                onLeave={() => setHoveredPlaylist(null)}
-                onClick={goToPlaylist}
-              />
-            ))
-          ) : (
-            <p>Loading playlists...</p>
+          {currentUser && (
+            <div className="icons">
+              <i className="fa-solid fa-plus" onClick={handleCreatePlaylist}></i>
+            </div>
           )}
         </div>
+
+        {/* Liked Playlist Section */}
+        {currentUser && (
+          <div className="liked-playlist" onClick={goToLikedSongs}>
+            <img
+              src={likedIcon}
+              alt="Liked Songs"
+              className="liked-playlist-image"
+            />
+            {!isCollapsed && <span>Liked Songs</span>}
+          </div>
+        )}
+
+        {/* Playlists Section */}
+        {currentUser ? (
+          <div className="playlists">
+            {playlists.length > 0 ? (
+              playlists.map((playlist, index) => (
+                <Playlist
+                  key={playlist.playlistID}
+                  playlist={playlist}
+                  index={index}
+                  isCollapsed={isCollapsed}
+                  isHovered={hoveredPlaylist === index}
+                  onHover={() => setHoveredPlaylist(index)}
+                  onLeave={() => setHoveredPlaylist(null)}
+                  onClick={goToPlaylist}
+                />
+              ))
+            ) : (
+              <p>Loading playlists...</p>
+            )}
+          </div>
+        ) : (
+          <p>Please log in to view your playlists.</p>
+        )}
       </div>
     </div>
   );

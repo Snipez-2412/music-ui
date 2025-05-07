@@ -12,7 +12,6 @@ function MainPage() {
         <MainContent>
           <Outlet />
         </MainContent>
-        <MusicPlayer />
       </div>
     );
   }

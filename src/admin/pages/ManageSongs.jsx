@@ -1,31 +1,77 @@
 import React, { useEffect, useState } from "react";
-import { List, Dropdown, Menu, Button, Modal, Form, Input, Select, Upload, message } from "antd";
+import { List, Dropdown, Menu, Button, Modal, Form, Input, Select } from "antd";
 import { EllipsisOutlined, ExclamationCircleOutlined, UploadOutlined } from "@ant-design/icons";
 import useSongStore from "../../zustand/store/SongStore";
 import useAlbumStore from "../../zustand/store/AlbumStore";
 import useArtistStore from "../../zustand/store/ArtistStore";
-import { useLyricsStore } from "../../zustand/store/LyricsStore"; // Import LyricsStore
+import { useLyricsStore } from "../../zustand/store/LyricsStore";
 
 const { Option } = Select;
+const { Search } = Input;
 
 function ManageSongs() {
   const { songs, fetchAllSongs, updateSong, deleteSong, addSong } = useSongStore();
   const { albums, fetchAllAlbums } = useAlbumStore();
   const { artists, fetchAllArtists } = useArtistStore();
-  const { lyrics, loadLyrics, createLyrics, editLyrics } = useLyricsStore(); // LyricsStore methods
+  const { lyrics, loadLyrics, editLyrics, removeLyrics } = useLyricsStore();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isLyricsModalVisible, setIsLyricsModalVisible] = useState(false); // Lyrics modal state
+  const [isLyricsModalVisible, setIsLyricsModalVisible] = useState(false);
   const [editingSong, setEditingSong] = useState(null);
   const [form] = Form.useForm();
-  const [lyricsForm] = Form.useForm(); // Form for lyrics
+  const [lyricsForm] = Form.useForm();
   const [coverFile, setCoverFile] = useState(null);
+  const [audioFile, setAudioFile] = useState(null);
+  const [filteredSongs, setFilteredSongs] = useState([]);
+  const [selectedArtist, setSelectedArtist] = useState(null);
+  const [selectedAlbum, setSelectedAlbum] = useState(null);
+  const [filteredAlbums, setFilteredAlbums] = useState(albums); 
+  const [formFilteredAlbums, setFormFilteredAlbums] = useState(albums);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchAllSongs();
     fetchAllAlbums();
     fetchAllArtists();
   }, [fetchAllSongs, fetchAllAlbums, fetchAllArtists]);
+
+  useEffect(() => {
+    if (isLyricsModalVisible) {
+      lyricsForm.setFieldsValue({ lyrics: lyrics || "" });
+    } else {
+      lyricsForm.resetFields();
+    }
+  }, [isLyricsModalVisible, lyrics, lyricsForm]);
+
+  useEffect(() => {
+    let filtered = songs;
+
+    if (selectedArtist) {
+      filtered = filtered.filter((song) => song.artistID === selectedArtist);
+    }
+
+    if (selectedAlbum) {
+      filtered = filtered.filter((song) => song.albumID === selectedAlbum);
+    }
+
+    if (searchQuery) {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (song) =>
+          song.title.toLowerCase().includes(lowerCaseQuery) ||
+          song.artistName.toLowerCase().includes(lowerCaseQuery) ||
+          song.albumTitle?.toLowerCase().includes(lowerCaseQuery)
+      );
+    }
+
+    setFilteredSongs(filtered);
+  }, [songs, selectedArtist, selectedAlbum, searchQuery]);
+
+  useEffect(() => {
+    if (!selectedArtist) {
+      setFilteredAlbums(albums);
+    }
+  }, [albums, selectedArtist]);
 
   const handleDelete = (id) => {
     Modal.confirm({
@@ -41,26 +87,51 @@ function ManageSongs() {
 
   const handleEdit = (song) => {
     setEditingSong(song);
-    form.setFieldsValue(song);
     setCoverFile(null);
+    setAudioFile(null);
+    form.setFieldsValue(song);
+
+    // Clear file input elements
+    const coverInput = document.querySelector('input[type="file"][accept="image/*"]');
+    const audioInput = document.querySelector('input[type="file"][accept="audio/mp3,audio/mpeg"]');
+    if (coverInput) coverInput.value = null;
+    if (audioInput) audioInput.value = null;
+
     setIsModalVisible(true);
   };
 
   const handleAdd = () => {
     setEditingSong(null);
-    form.resetFields();
     setCoverFile(null);
+    setAudioFile(null);
+    form.resetFields();
+
+    // Clear file input elements
+    const coverInput = document.querySelector('input[type="file"][accept="image/*"]');
+    const audioInput = document.querySelector('input[type="file"][accept="audio/mp3,audio/mpeg"]');
+    if (coverInput) coverInput.value = null;
+    if (audioInput) audioInput.value = null;
+
     setIsModalVisible(true);
   };
 
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
+      console.log("Form values:", values);
+
       if (editingSong) {
-        await updateSong(editingSong.songID, { ...editingSong, ...values }, coverFile);
+        const payload = {
+          songID: editingSong.songID,
+          ...values,
+        };
+        console.log("Updating song with payload:", payload);
+        await updateSong(payload, coverFile, audioFile);
       } else {
-        await addSong(values, coverFile);
+        console.log("Adding new song with values:", values);
+        await addSong(values, coverFile, audioFile);
       }
+
       setIsModalVisible(false);
       setEditingSong(null);
     } catch (error) {
@@ -68,25 +139,16 @@ function ManageSongs() {
     }
   };
 
-  const handleCoverChange = ({ file }) => {
-    setCoverFile(file.originFileObj);
-  };
-
-  const handleLyrics = async (song) => {
+  const handleManageLyrics = async (song) => {
     setEditingSong(song);
-    await loadLyrics(song.songID); // Load lyrics for the selected song
-    lyricsForm.setFieldsValue({ content: lyrics || "" }); // Pre-fill lyrics if available
     setIsLyricsModalVisible(true);
+    await loadLyrics(song.songID);
   };
 
   const handleSaveLyrics = async () => {
     try {
-      const { content } = await lyricsForm.validateFields();
-      if (lyrics) {
-        await editLyrics(editingSong.songID, content); // Edit existing lyrics
-      } else {
-        await createLyrics(editingSong.songID, content); // Add new lyrics
-      }
+      const values = await lyricsForm.validateFields();
+      await editLyrics(editingSong.songID, values.lyrics);
       setIsLyricsModalVisible(false);
       setEditingSong(null);
     } catch (error) {
@@ -94,16 +156,64 @@ function ManageSongs() {
     }
   };
 
+  const handleDeleteLyrics = async () => {
+    Modal.confirm({
+      title: "Are you sure you want to delete the lyrics?",
+      icon: <ExclamationCircleOutlined />,
+      content: "This action cannot be undone.",
+      okText: "Yes, Delete",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: async () => {
+        await removeLyrics(editingSong.songID);
+        setIsLyricsModalVisible(false);
+        setEditingSong(null);
+      },
+    });
+  };
+
+  const handleArtistFilterChange = (value) => {
+    setSelectedArtist(value);
+
+    if (value) {
+      const filtered = albums.filter((album) => album.artistID === value);
+      setFilteredAlbums(filtered);
+    } else {
+      setFilteredAlbums(albums);
+    }
+
+    setSelectedAlbum(null);
+  };
+
+  const handleAlbumFilterChange = (value) => {
+    setSelectedAlbum(value);
+  };
+
+  const handleFormArtistChange = (value) => {
+    form.setFieldsValue({ albumID: null });
+
+    if (value) {
+      const filtered = albums.filter((album) => album.artistID === value);
+      setFormFilteredAlbums(filtered);
+    } else {
+      setFormFilteredAlbums(albums);
+    }
+  };
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+  };
+
   const renderMenu = (song) => (
     <Menu>
       <Menu.Item key="edit" onClick={() => handleEdit(song)}>
         Edit
       </Menu.Item>
-      <Menu.Item key="delete" danger onClick={() => handleDelete(song.songID)}>
-        Delete
-      </Menu.Item>
-      <Menu.Item key="lyrics" onClick={() => handleLyrics(song)}>
+      <Menu.Item key="manage-lyrics" onClick={() => handleManageLyrics(song)}>
         Manage Lyrics
+      </Menu.Item>
+      <Menu.Item key="delete" onClick={() => handleDelete(song.songID)}>
+        Delete
       </Menu.Item>
     </Menu>
   );
@@ -111,6 +221,46 @@ function ManageSongs() {
   return (
     <div>
       <h1>Manage Songs</h1>
+
+      {/* Search Bar */}
+      <div style={{ marginBottom: "16px" }}>
+        <Search
+          placeholder="Search by song, artist, or album"
+          allowClear
+          onSearch={handleSearch}
+          style={{ width: "100%" }}
+        />
+      </div>
+
+      {/* Filter Buttons */}
+      <div style={{ display: "flex", gap: "16px", marginBottom: "16px" }}>
+        <Select
+          placeholder="Filter by Artist"
+          allowClear
+          onChange={handleArtistFilterChange}
+          style={{ width: 200 }}
+        >
+          {artists.map((artist) => (
+            <Option key={artist.artistID} value={artist.artistID}>
+              {artist.name}
+            </Option>
+          ))}
+        </Select>
+
+        <Select
+          placeholder="Filter by Album"
+          allowClear
+          onChange={handleAlbumFilterChange}
+          style={{ width: 200 }}
+        >
+          {filteredAlbums.map((album) => (
+            <Option key={album.albumID} value={album.albumID}>
+              {album.title}
+            </Option>
+          ))}
+        </Select>
+      </div>
+
       <Button
         type="primary"
         icon={<UploadOutlined />}
@@ -120,7 +270,7 @@ function ManageSongs() {
         Add Song
       </Button>
       <List
-        dataSource={songs}
+        dataSource={filteredSongs}
         renderItem={(song) => (
           <List.Item
             actions={[
@@ -131,10 +281,16 @@ function ManageSongs() {
           >
             <List.Item.Meta
               title={song.title}
-              description={`Artist: ${song.artistName}`}
+              description={`Artist: ${song.artistName} | Album: ${song.albumTitle || "No Album"}`}
             />
           </List.Item>
         )}
+        style={{
+          maxHeight: "400px",
+          overflowY: "auto",
+          border: "1px solid #f0f0f0",
+          padding: "8px",
+        }}
       />
 
       {/* Add/Edit Song Modal */}
@@ -154,9 +310,10 @@ function ManageSongs() {
           >
             <Input />
           </Form.Item>
+
           <Form.Item
-            name="artistName"
-            label="Artist Name"
+            name="artistID"
+            label="Artist"
             rules={[{ required: true, message: "Please select an artist" }]}
           >
             <Select
@@ -166,70 +323,106 @@ function ManageSongs() {
               filterOption={(input, option) =>
                 option.children.toLowerCase().includes(input.toLowerCase())
               }
+              onChange={handleFormArtistChange}
             >
               {artists.map((artist) => (
-                <Option key={artist.id} value={artist.name}>
+                <Option key={artist.artistID} value={artist.artistID}>
                   {artist.name}
                 </Option>
               ))}
             </Select>
           </Form.Item>
-          <Form.Item
-            name="duration"
-            label="Duration"
-            rules={[{ required: true, message: "Please enter the duration" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="albumID"
-            label="Assign Album"
-            rules={[{ required: false }]}
-          >
+
+          <Form.Item name="albumID" label="Assign Album">
             <Select
               showSearch
               placeholder="Select an album"
               optionFilterProp="children"
+              allowClear
               filterOption={(input, option) =>
                 option.children.toLowerCase().includes(input.toLowerCase())
               }
             >
               <Option value={null}>No Album</Option>
-              {albums.map((album) => (
+              {formFilteredAlbums.map((album) => (
                 <Option key={album.albumID} value={album.albumID}>
                   {album.title}
                 </Option>
               ))}
             </Select>
           </Form.Item>
-          <Form.Item label="Cover Image">
-            <Upload
-              beforeUpload={() => false}
-              onChange={handleCoverChange}
-              maxCount={1}
-            >
-              <Button icon={<UploadOutlined />}>Upload Cover</Button>
-            </Upload>
+
+          {/* New Genre Field as Input */}
+          <Form.Item
+            name="genre"
+            label="Genre"
+            rules={[{ required: false, message: "Please enter the genre" }]}
+          >
+            <Input placeholder="Enter the genre" />
+          </Form.Item>
+
+          {/* File input for cover image */}
+          <Form.Item
+            label="Cover Image"
+            valuePropName="file"
+            extra="Upload an image file"
+          >
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setCoverFile(e.target.files[0])}
+            />
+          </Form.Item>
+
+          {/* File input for MP3 file */}
+          <Form.Item
+            label="MP3 File"
+            valuePropName="file"
+            extra="Upload an audio file"
+            rules={[
+              {
+                required: true,
+                message: "Please upload an audio file",
+              },
+            ]}
+          >
+            <input
+              type="file"
+              accept="audio/mp3,audio/mpeg"
+              onChange={(e) => setAudioFile(e.target.files[0])}
+              required
+            />
           </Form.Item>
         </Form>
       </Modal>
 
-      {/* Add/Edit Lyrics Modal */}
+      {/* Manage Lyrics Modal */}
       <Modal
-        title="Manage Lyrics"
+        title={`Manage Lyrics for ${editingSong?.title || "Song"}`}
         visible={isLyricsModalVisible}
         onOk={handleSaveLyrics}
         onCancel={() => setIsLyricsModalVisible(false)}
         okText="Save"
         cancelText="Cancel"
+        footer={[
+          <Button key="delete" danger onClick={handleDeleteLyrics}>
+            Delete Lyrics
+          </Button>,
+          <Button key="cancel" onClick={() => setIsLyricsModalVisible(false)}>
+            Cancel
+          </Button>,
+          <Button key="save" type="primary" onClick={handleSaveLyrics}>
+            Save
+          </Button>,
+        ]}
       >
         <Form form={lyricsForm} layout="vertical">
           <Form.Item
-            name="content"
+            name="lyrics"
             label="Lyrics"
-            rules={[{ required: true, message: "Please enter the lyrics" }]}
+            rules={[{ required: false, message: "Please enter the lyrics" }]}
           >
-            <Input.TextArea rows={6} />
+            <Input.TextArea rows={6} placeholder="Enter song lyrics here" />
           </Form.Item>
         </Form>
       </Modal>
