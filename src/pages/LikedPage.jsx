@@ -62,12 +62,6 @@ function LikedSongs() {
         </div>
       </div>
 
-      <div className="song-list-header">
-        <span>#</span>
-        <span>Title</span>
-      </div>
-      <hr className="divider" />
-
       <SongList songs={likedSongs} />
     </div>
   );

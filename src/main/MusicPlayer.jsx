@@ -21,8 +21,8 @@ function MusicPlayer() {
   }, [setAudioRef]);
 
   const audioSrc = currentSong?.signedFilePath || "";
-  const songTitle = currentSong?.title || "No song selected";
-  const singer = currentSong?.artistName || "Unknown Artist";
+  const songTitle = currentSong?.title;
+  const singer = currentSong?.artistName;
   const cover = currentSong?.signedCoverUrl || "";
 
   // Smoothly transition between songs when the src changes
@@ -41,7 +41,7 @@ function MusicPlayer() {
       {/* Album Info */}
       <div className="album">
         <div className="album-img">
-          <img src={cover} alt="Album Cover" />
+          <img src={cover}/>
         </div>
         <div className="name">
           <p className="album-title">{songTitle}</p>

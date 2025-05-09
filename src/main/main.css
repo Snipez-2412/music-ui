@@ -550,11 +550,13 @@ a:hover {
   display: flex;
   justify-content: flex-start; /* Đẩy nội dung về bên trái */
   align-items: center;
+  margin-left: 1rem;
 }
 
 .album-img img {
   width: 50px; /* Đặt kích thước cho ảnh album */
   height: auto;
+  border-radius: 5px;
 }
 
 .name {
@@ -818,7 +820,9 @@ a:hover {
   transform: scale(1.1);
 }
 
-.album-list {
+.album-list,
+.album-history,
+.artist-history {
   display: flex;
   flex-wrap: wrap;
   gap: 16px; /* Adjust spacing between cards */

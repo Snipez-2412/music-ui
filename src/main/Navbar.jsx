@@ -28,6 +28,7 @@ function Navbar() {
 
   const handleLogout = () => {
     setCurrentUser(null);
+    sessionStorage.clear();
     navigate("/login");
   };
 

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { addToHistory } from "../api/HistoryAPI"; // Import the History API function
 
 const useMusicPlayerStore = create((set, get) => ({
   isPlaying: false,
@@ -67,28 +68,36 @@ const useMusicPlayerStore = create((set, get) => ({
   },
 
   nextSong: () => {
-    const { currentSong, songs } = get();
+    const { currentSong, songs, setCurrentSong } = get();
     const currentIndex = songs.findIndex((song) => song.id === currentSong.id);
-    const nextIndex = (currentIndex + 1) % songs.length; 
-    set({ currentSong: songs[nextIndex] });
+    const nextIndex = (currentIndex + 1) % songs.length;
+    setCurrentSong(songs[nextIndex]); // Automatically add the next song to history
     console.log("Next Song Index:", nextIndex);
   },
 
   previousSong: () => {
-    const { currentSong, songs } = get();
+    const { currentSong, songs, setCurrentSong } = get();
     const currentIndex = songs.findIndex((song) => song.id === currentSong.id);
     const previousIndex = (currentIndex - 1 + songs.length) % songs.length; // Loop back to the end
-    set({ currentSong: songs[previousIndex] });
+    setCurrentSong(songs[previousIndex]); // Automatically add the previous song to history
     console.log("Previous Song Index:", previousIndex);
   },
 
-  setCurrentSong: (song) => {
+  setCurrentSong: async (song) => {
     const { songs } = get();
     const index = songs.findIndex((s) => s.songID === song.songID);
     if (index !== -1) {
       set({ currentIndex: index, currentSong: song });
       console.log("Playlist:", songs); // Log the entire playlist
       console.log("Now playing:", song); // Log the current song
+
+      // Add the song to history
+      try {
+        await addToHistory(song.songID || song.id);
+        console.log("Song added to history:", song.songID || song.id);
+      } catch (error) {
+        console.error("Failed to add song to history:", error);
+      }
     } else {
       console.error("Song not found in the playlist:", song);
     }

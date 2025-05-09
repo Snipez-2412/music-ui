@@ -1,31 +1,111 @@
 .song-list {
   width: 100%;
   max-height: 500px;
-  overflow-y: auto;
+  overflow-y: auto; /* Allow scrolling for the list */
+  display: flex;
+  flex-direction: column;
 }
 
+/* Style for the song row */
 .song-row {
-  display: grid;
-  grid-template-columns: 5% 40% 25% 15% 10%;
-  gap: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 10px;
-  border-bottom: 1px solid #333;
+  margin-left: -10px;
+  position: relative;
+}
+
+.song-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-left: 20px;
+}
+
+.song-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  margin-left: 20px;
+}
+
+.song-title {
+  font-size: 16px;
   color: white;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.song-artist {
+  font-size: 14px;
+  color: #b3b3b3;
+  margin-top: 2px;
+}
+
+.song-artist {
+  font-size: 14px;
+  color: #b3b3b3;
+  margin-top: 2px;
+}
+
+.song-row .song-album {
+  text-align: left;
+  width: 480px;
+  font-size: 14px;
+}
+
+/* Style for the 3-dot menu button */
+.song-options {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 30%;
+  transition: border 0.3s ease;
+  position: absolute;
+  margin-left: 90%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.song-options:hover {
+  border: 1px solid white;
 }
 
 .song-index {
   text-align: left;
+  width: 2%;
+  margin-left: 1rem;
 }
 
-.song-title {
+.song-list-header {
+  position: sticky; /* Make the header stick to the top */
+  top: 0; /* Stick to the top of the container */
+  z-index: 10; /* Ensure it stays above the list */
+  background-color: #121212;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.song-list-header .song-index {
   text-align: left;
 }
 
-.song-artist {
-  text-align: left;
+.song-list-header .song-title {
+  flex: 1;
+  margin-left: 20px;
 }
 
-.song-plays,
-.song-duration {
-  text-align: right;
+.song-list-header .song-album {
+  text-align: left;
+  margin-right: 450px;
 }

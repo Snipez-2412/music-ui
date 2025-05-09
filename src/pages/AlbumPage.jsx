@@ -34,6 +34,7 @@ function AlbumPage() {
     id: song.songID,
     title: song.title,
     artistName: song.artistName,
+    albumTitle: song.albumTitle,
     signedCoverUrl: song.signedCoverUrl,
     signedFilePath: song.signedFilePath,
   }));
@@ -50,12 +51,6 @@ function AlbumPage() {
           </p>
         </div>
       </div>
-
-      <div className="song-list-header">
-        <span>#</span>
-        <span>Title</span>
-      </div>
-      <hr className="divider" />
 
       <SongList songs={normalizedSongs} />
     </div>
