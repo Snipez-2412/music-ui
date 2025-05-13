@@ -1,22 +1,15 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUserStore } from '../zustand/store/UserStore';
-import { usePlaylistStore } from '../zustand/store/PlaylistStore';
-import Card from '../main/Card';
+import { Avatar } from 'antd';
 import './UserProfilePage.css';
 
-const UserProfilePage = () => {
+const UserProfilePage = () => {  
   const { id } = useParams();
-  const { currentUser, updateUser } = useUserStore((state) => ({
-    currentUser: state.currentUser,
-    updateUser: state.updateUser,
-  }));
-
-  const { playlists, loadPlaylists, loading: playlistsLoading } = usePlaylistStore((state) => ({
-    playlists: state.playlists,
-    loadPlaylists: state.loadPlaylists,
-    loading: state.loading,
-  }));
+  
+  // More specific selector to prevent unnecessary re-renders
+  const currentUser = useUserStore(useCallback(state => state.currentUser, []));
+  const updateUser = useUserStore(useCallback(state => state.updateUser, []));
 
   const [userDetails, setUserDetails] = useState({
     username: '',
@@ -27,65 +20,53 @@ const UserProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
-  
 
-  // Memoize the loadPlaylists callback
-  const loadUserPlaylists = useCallback(async () => {
-    try {
-      if (currentUser?.userID) {
-        await loadPlaylists(currentUser.userID);
-      }
-    } catch (err) {
-      setError('Failed to load playlists');
-      console.error('Error loading playlists:', err);
+  const memoizedUserDetails = useMemo(() => {
+    if (!currentUser) return null;
+    return {
+      username: currentUser.username || '',
+      email: currentUser.email || '',
+      profilePic: currentUser.signedProfileUrl || null,
+    };
+  }, [currentUser?.username, currentUser?.email, currentUser?.signedProfileUrl]);
+
+  // Load user details when memoized details change
+  useEffect(() => {
+    if (memoizedUserDetails && JSON.stringify(memoizedUserDetails) !== JSON.stringify(userDetails)) {
+      setUserDetails(memoizedUserDetails);
     }
-  }, [currentUser?.userID, loadPlaylists]);
+  }, [memoizedUserDetails]);
 
-  useEffect(() => {
-    console.log("Current User in UserProfile:", currentUser);
-  }, [currentUser]);
-
-  // Load playlists when user ID changes
-  useEffect(() => {
-    loadUserPlaylists();
-  }, [loadUserPlaylists]);
-
-  // Memoize the user details update
-  const updateUserDetails = useCallback(() => {
-    if (currentUser && !isEditing) {
-      const newDetails = {
-        username: currentUser.username || '',
-        email: currentUser.email || '',
-        profilePic: currentUser.profilePicUrl || null,
-      };
-      
-      // Only update if the details have changed
-      if (JSON.stringify(userDetails) !== JSON.stringify(newDetails)) {
-        setUserDetails(newDetails);
-      }
+  const profilePicUrl = useMemo(() => {
+    if (userDetails.profilePic instanceof File) {
+      return URL.createObjectURL(userDetails.profilePic);
     }
-  }, [currentUser, isEditing, userDetails]);
-
-  // Update user details only when not editing
-  useEffect(() => {
-    updateUserDetails();
-  }, [updateUserDetails]);
+    return userDetails.profilePic || '/default-profile-pic.png';
+  }, [userDetails.profilePic]);
 
   const handleProfileChange = useCallback((e) => {
     const { name, value, files } = e.target;
     if (name === 'profilePic') {
-      setUserDetails((prev) => ({ ...prev, profilePic: files[0] }));
+      const file = files[0];
+      if (file) {
+        setUserDetails((prev) => ({ ...prev, profilePic: file }));
+      }
     } else {
-      setUserDetails((prev) => ({ ...prev, [name]: value }));
+      setUserDetails((prev) => {
+        if (prev[name] !== value) {
+          return { ...prev, [name]: value };
+        }
+        return prev;
+      });
     }
   }, []);
 
   const handleSave = useCallback(async () => {
     if (!currentUser) return;
-    
+
     setIsSaving(true);
     setError(null);
-    
+
     try {
       await updateUser(id, userDetails, userDetails.profilePic);
       setIsEditing(false);
@@ -96,27 +77,6 @@ const UserProfilePage = () => {
       setIsSaving(false);
     }
   }, [currentUser, id, updateUser, userDetails]);
-
-  // Memoize the playlist cards
-  const playlistCards = useMemo(() => {
-    if (playlistsLoading) {
-      return <p>Loading playlists...</p>;
-    }
-    
-    if (playlists.length === 0) {
-      return <p>No playlists found</p>;
-    }
-    
-    return playlists.map((playlist) => (
-      <Card
-        key={playlist.playlistID}
-        image={playlist.signedCoverUrl}
-        title={playlist.name}
-        info={`${playlist.songCount || 0} songs`}
-        type="playlist"
-      />
-    ));
-  }, [playlists, playlistsLoading]);
 
   if (!currentUser) {
     return <div className="loading-container">Loading user profile...</div>;
@@ -130,15 +90,13 @@ const UserProfilePage = () => {
     <div className="user-profile-page">
       <div className="user-profile-header">
         <div className="profile-picture">
-          <img
-            src={userDetails.profilePic || '/default-profile-pic.png'}
-            alt={currentUser.username}
-            className="profile-image"
+          <Avatar
+            size={120}
+            src={profilePicUrl}
           />
         </div>
         <div className="profile-details">
           <div className="profile-field">
-            <label>Username:</label>
             {isEditing ? (
               <input
                 type="text"
@@ -148,7 +106,7 @@ const UserProfilePage = () => {
                 disabled={isSaving}
               />
             ) : (
-              <p>{userDetails.username}</p>
+              <h3>{userDetails.username}</h3>
             )}
           </div>
           <div className="profile-field">
@@ -179,28 +137,21 @@ const UserProfilePage = () => {
             )}
           </div>
           {isEditing ? (
-            <button 
-              onClick={handleSave} 
+            <button
+              onClick={handleSave}
               className="save-button"
               disabled={isSaving}
             >
               {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
           ) : (
-            <button 
-              onClick={() => setIsEditing(true)} 
+            <button
+              onClick={() => setIsEditing(true)}
               className="edit-button"
             >
               Edit Profile
             </button>
           )}
-        </div>
-      </div>
-
-      <div className="user-playlists">
-        <h2>Your Playlists</h2>
-        <div className="playlists-grid">
-          {playlistCards}
         </div>
       </div>
     </div>

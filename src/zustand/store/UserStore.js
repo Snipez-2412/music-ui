@@ -6,7 +6,10 @@ export const useUserStore = create((set) => ({
   currentUser: null,
   currentUserId: null,
 
-  setCurrentUser: (user) => set({ currentUser: user }),
+  setCurrentUser: (user) => {
+  console.log('Setting currentUser:', user);
+  set({ currentUser: user });
+  },
   clearCurrentUser: () => set({ currentUser: null, currentUserId: null }),
 
   restoreUserFromSession: async () => {
