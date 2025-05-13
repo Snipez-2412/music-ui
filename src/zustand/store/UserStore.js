@@ -46,9 +46,9 @@ export const useUserStore = create((set) => ({
     }
   },
 
-  createUser: async (user, profilePic) => {
+  createUser: async (user) => {
     try {
-      const addedUser = await userAPI.addUser(user, profilePic);
+      const addedUser = await userAPI.addUser(user);
       set((state) => ({ users: [...state.users, addedUser] }));
     } catch (error) {
       console.error("Error creating user:", error);
@@ -60,7 +60,6 @@ export const useUserStore = create((set) => ({
       const updatedUser = await userAPI.updateUser(id, user, profilePic);
       set((state) => ({
         users: state.users.map((u) => (u.id === id ? updatedUser : u)),
-        currentUser: updatedUser,
       }));
     } catch (error) {
       console.error("Error updating user:", error);

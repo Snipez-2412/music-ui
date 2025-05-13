@@ -17,11 +17,11 @@ function Sidebar() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (currentUser) {
-      loadPlaylists(); // Load playlists only if the user is logged in
+    useEffect(() => {
+    if (currentUser?.userID) {
+      loadPlaylists(currentUser.userID);
     }
-  }, [loadPlaylists, currentUser]);
+  }, [currentUser?.userID, loadPlaylists]);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);

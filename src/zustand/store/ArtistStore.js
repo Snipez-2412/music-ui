@@ -33,7 +33,7 @@ const useArtistStore = create((set) => ({
     }
   },
 
-  createArtist: async (artist, imageFile) => {
+  addArtist: async (artist, imageFile) => {
     try {
       const newArtist = await artistAPI.addArtist(artist, imageFile);
       set((state) => ({ artists: [...state.artists, newArtist] }));
@@ -42,10 +42,9 @@ const useArtistStore = create((set) => ({
     }
   },
 
-  updateArtist: async (artist) => {
+  updateArtist: async (artist, imageFile) => {
     try {
-      const updated = await artistAPI.updateArtist(artist);
-      console.log("Updated artist:", updated); // Debug log
+      const updated = await artistAPI.updateArtist(artist, imageFile);
       set((state) => {
         const updatedArtists = state.artists.map((a) =>
           a.artistID === updated.artistID ? updated : a 

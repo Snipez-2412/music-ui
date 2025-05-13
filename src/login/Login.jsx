@@ -4,8 +4,7 @@ import { SignInPage } from '@toolpad/core/SignInPage';
 import { useUserStore } from "../zustand/store/UserStore";
 import { useTheme, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
-import { useNavigate, Link } from "react-router-dom"; // Import Link for navigation
-
+import { useNavigate, Link } from "react-router-dom";
 // Spotify colors
 const spotifyColors = {
   primary: '#1DB954',
@@ -14,7 +13,7 @@ const spotifyColors = {
 };
 
 const providers = [
-  { id: 'credentials', name: 'Username and password' }, // Updated to say "Username and password"
+  { id: 'credentials', name: 'Username and password' },
   { id: 'google', name: 'Google' },
   { id: 'facebook', name: 'Facebook' },
   { id: 'twitter', name: 'Twitter' },
@@ -25,11 +24,15 @@ function CombinedSignInPage() {
 
   const signIn = async (provider, formData) => {
     if (provider.id === 'credentials') {
-      const username = formData?.get('email'); // Updated to use "username" instead of "email"
+      const username = formData?.get('email'); 
       const password = formData?.get('password');
 
+      if (!username || !password) {
+        return { type: 'CredentialsSignin', error: 'Username and password are required.' };
+      }
+
       const urlEncodedBody = new URLSearchParams();
-      urlEncodedBody.append('username', username); // Updated to send "username"
+      urlEncodedBody.append('username', username); 
       urlEncodedBody.append('password', password);
 
       try {
@@ -46,13 +49,12 @@ function CombinedSignInPage() {
           throw new Error('Incorrect username or password.');
         }
 
-        // Fetch the current user after successful login
         const fetchCurrentUser = useUserStore.getState().restoreUserFromSession;
         await fetchCurrentUser();
 
         console.log("Stored user:", useUserStore.getState().currentUser);
 
-        navigate('/'); // Redirect to the home page
+        navigate('/');
         return { type: 'CredentialsSignin' };
       } catch (error) {
         console.error("Login error:", error.message);
@@ -107,11 +109,10 @@ function CombinedSignInPage() {
         providers={providers}
         signIn={signIn}
         slotProps={{
-          emailField: { label: 'Username', autoFocus: true }, // Updated label to "Username"
+          emailField: { label: 'Username', autoFocus: true }, 
           form: { noValidate: true },
         }}
       />
-      {/* Add the signup link manually below the SignInPage */}
       <div style={{ textAlign: 'center', marginTop: '-10%' }}>
         <p style={{ color: spotifyColors.text }}>
           Don't have an account? <Link to="/signup" style={{ color: spotifyColors.primary }}>Sign up</Link>

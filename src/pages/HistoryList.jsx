@@ -1,35 +1,79 @@
-import React, { useEffect } from "react";
-import Card from "../main/card";
-import SongList from "./SongList";
+import React, { useEffect, useCallback, useMemo } from "react";
+import Card from "../main/Card";
+import SongList from "../Pages/SongList";
 import useHistoryStore from "../zustand/store/HistoryStore";
 import { useUserStore } from "../zustand/store/UserStore"; // Import user store
 
 function HistoryList() {
-  const recentSongs = useHistoryStore((state) => state.recentSongs);
-  const recentAlbums = useHistoryStore((state) => state.recentAlbums);
-  const recentArtists = useHistoryStore((state) => state.recentArtists);
-  const loading = useHistoryStore((state) => state.loading);
-  const error = useHistoryStore((state) => state.error);
-  const fetchRecentSongs = useHistoryStore((state) => state.fetchRecentSongs);
-  const fetchRecentAlbums = useHistoryStore((state) => state.fetchRecentAlbums);
-  const fetchRecentArtists = useHistoryStore((state) => state.fetchRecentArtists);
+  const {
+    recentSongs,
+    recentAlbums,
+    recentArtists,
+    loading,
+    error,
+    fetchRecentSongs,
+    fetchRecentAlbums,
+    fetchRecentArtists,
+  } = useHistoryStore();
 
   const currentUser = useUserStore((state) => state.currentUser); // Get the current user
 
-  useEffect(() => {
+  // Memoize the fetch functions
+  const fetchHistory = useCallback(async () => {
     if (currentUser) {
       console.log("Fetching recent history...");
-      fetchRecentSongs();
-      fetchRecentAlbums();
-      fetchRecentArtists();
+      await Promise.all([
+        fetchRecentSongs(),
+        fetchRecentAlbums(),
+        fetchRecentArtists(),
+      ]);
     }
-  }, [fetchRecentSongs, fetchRecentAlbums, fetchRecentArtists, currentUser]);
+  }, [currentUser, fetchRecentSongs, fetchRecentAlbums, fetchRecentArtists]);
 
+  // Fetch history only when user changes
   useEffect(() => {
-    console.log("Recent Songs:", recentSongs);
-    console.log("Recent Albums:", recentAlbums);
-    console.log("Recent Artists:", recentArtists);
-  }, [recentSongs, recentAlbums, recentArtists]);
+    fetchHistory();
+  }, [fetchHistory]);
+
+  // Memoize the song list
+  const songList = useMemo(() => {
+    if (recentSongs.length === 0) {
+      return <p>No recently played songs available.</p>;
+    }
+    return <SongList songs={recentSongs} />;
+  }, [recentSongs]);
+
+  // Memoize the album list
+  const albumList = useMemo(() => {
+    if (recentAlbums.length === 0) {
+      return <p>No recently played albums available.</p>;
+    }
+    return recentAlbums.map((album) => (
+      <Card
+        key={album.albumID}
+        image={album.signedCoverUrl}
+        title={album.albumTitle}
+        info={album.artistName || "Unknown Artist"}
+        type="album"
+      />
+    ));
+  }, [recentAlbums]);
+
+  // Memoize the artist list
+  const artistList = useMemo(() => {
+    if (recentArtists.length === 0) {
+      return <p>No recently played artists available.</p>;
+    }
+    return recentArtists.map((artist) => (
+      <Card
+        key={artist.artistID}
+        image={artist.signedCoverUrl}
+        title={artist.artistName}
+        info="Artist"
+        type="artist"
+      />
+    ));
+  }, [recentArtists]);
 
   if (!currentUser) {
     return <p>Please log in to view your history.</p>; // Render a message if the user is not logged in
@@ -44,44 +88,16 @@ function HistoryList() {
       ) : (
         <>
           <h2>Recently Played Songs</h2>
-          {recentSongs.length > 0 ? (
-            <SongList songs={recentSongs} />
-          ) : (
-            <p>No recently played songs available.</p>
-          )}
+          {songList}
 
           <h2>Recently Played Albums</h2>
           <div className="album-history">
-            {recentAlbums.length > 0 ? (
-              recentAlbums.map((album) => (
-                <Card
-                  key={album.albumID}
-                  image={album.signedCoverUrl}
-                  title={album.albumTitle}
-                  info={album.artistName || "Unknown Artist"}
-                  type="album"
-                />
-              ))
-            ) : (
-              <p>No recently played albums available.</p>
-            )}
+            {albumList}
           </div>
 
           <h2>Recently Played Artists</h2>
           <div className="artist-history">
-            {recentArtists.length > 0 ? (
-              recentArtists.map((artist) => (
-                <Card
-                  key={artist.artistID}
-                  image={artist.signedCoverUrl}
-                  title={artist.artistName}
-                  info="Artist"
-                  type="artist"
-                />
-              ))
-            ) : (
-              <p>No recently played artists available.</p>
-            )}
+            {artistList}
           </div>
         </>
       )}
@@ -89,4 +105,4 @@ function HistoryList() {
   );
 }
 
-export default HistoryList;
+export default React.memo(HistoryList);

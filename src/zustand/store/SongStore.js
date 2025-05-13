@@ -29,7 +29,7 @@ const useSongStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const songs = await songAPI.fetchSongsByAlbumId(albumId);
-      console.log("Fetched songs for album:", songs);
+      // console.log("Fetched songs for album:", songs);
       set({ songs, loading: false });
     } catch (error) {
       set({ error: error.message, loading: false });

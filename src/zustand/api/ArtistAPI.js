@@ -21,7 +21,9 @@ export const searchArtists = async (criteria) => {
 
 export const addArtist = async (artist, imageFile) => {
   const formData = new FormData();
-  formData.append("artist", new Blob([JSON.stringify(artist)], { type: "application/json" }));
+  formData.append("artist", 
+    new Blob([JSON.stringify(artist)], { type: "application/json" }
+  ));
   if (imageFile) formData.append("image", imageFile);
 
   const res = await fetch(BASE_URL, {
@@ -32,12 +34,16 @@ export const addArtist = async (artist, imageFile) => {
   return res.json();
 };
 
-export const updateArtist = async (artist) => {
+export const updateArtist = async (artist, imageFile) => {
+  const formData = new FormData();
+  formData.append("artist", 
+    new Blob([JSON.stringify(artist)], { type: "application/json" }
+  ));
+  if (imageFile) formData.append("image", imageFile);
+
   const res = await fetch(BASE_URL, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(artist),
-    credentials: "include",
+    body: formData,
   });
   if (!res.ok) throw new Error("Failed to update artist");
   return res.json();

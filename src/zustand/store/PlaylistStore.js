@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import * as playlistAPI from "../api/PlaylistAPI";
-import { useUserStore } from "../store/UserStore"; // Import UserStore
 
 export const usePlaylistStore = create((set, get) => ({
   playlists: [],
@@ -8,11 +7,12 @@ export const usePlaylistStore = create((set, get) => ({
   loading: false,
   error: null,
 
-  // Lấy tất cả playlist của user hiện tại
-  loadPlaylists: async () => {
+  loadPlaylists: async (userId) => {
+    if (!userId) return;
+    
     set({ loading: true, error: null });
     try {
-      const data = await playlistAPI.fetchPlaylists();
+      const data = await playlistAPI.fetchPlaylists(userId);
       set({ playlists: data, loading: false });
     } catch (error) {
       set({ error: error.message, loading: false });

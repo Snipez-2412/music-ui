@@ -20,7 +20,7 @@ function Navbar() {
 
   const handleProfileClick = () => {
     if (currentUser) {
-      navigate(`/profile/${currentUser.id}`, { state: { user: currentUser } });
+      navigate(`/profile/${currentUser.userID}`, { state: { user: currentUser } });
     } else {
       navigate("/login");
     }
@@ -60,7 +60,7 @@ function Navbar() {
       </div>
 
       <div className="right">
-      {currentUser?.roles?.includes("ROLE_ADMIN") && (
+        {currentUser?.roles?.includes("ROLE_ADMIN") && (
           <button
             className="admin-btn"
             onClick={() => navigate("/admin")}
@@ -79,7 +79,17 @@ function Navbar() {
         )}
         {currentUser ? (
           <div className="profile-section" style={{ display: "flex", alignItems: "center" }}>
-            <span style={{ marginRight: "10px", fontWeight: "bold", color: "#1DB954" }}>
+            <span 
+              onClick={handleProfileClick}
+              style={{ 
+                marginRight: "10px", 
+                fontWeight: "bold", 
+                color: "#1DB954",
+                cursor: "pointer",
+                textDecoration: "underline",
+                textUnderlineOffset: "4px"
+              }}
+            >
               👋 {getDisplayName()}
             </span>
             <button

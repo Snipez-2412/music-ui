@@ -10,7 +10,7 @@ function Playlist({ playlist, isCollapsed, isHovered, onHover, onLeave }) {
         onMouseLeave={onLeave}
       >
         <img
-          src={playlist.signedCoverUrl || songPicture}
+          src={playlist.signedCoverUrl}
           className="playlist-img"
           alt="playlist cover"
         />

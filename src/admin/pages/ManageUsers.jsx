@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { List, Dropdown, Menu, Button, Modal, Form, Input, Select } from "antd";
-import { EllipsisOutlined, ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { List, Dropdown, Menu, Button, Modal, Form, Input, Select, Upload, Avatar } from "antd";
+import { EllipsisOutlined, ExclamationCircleOutlined, PlusOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons";
 import { useUserStore } from "../../zustand/store/UserStore";
 
 const { Option } = Select;
@@ -14,6 +14,7 @@ function ManageUsers() {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedRole, setSelectedRole] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [profilePicFile, setProfilePicFile] = useState(null);
 
   useEffect(() => {
     fetchUsers();
@@ -36,6 +37,7 @@ function ManageUsers() {
     }
 
     setFilteredUsers(filtered);
+    console.log("Fetched Users:", users);
   }, [users, selectedRole, searchQuery]);
 
   const handleRoleFilterChange = (value) => {
@@ -64,28 +66,51 @@ function ManageUsers() {
       username: user.username,
       email: user.email,
       role: user.roles,
+      password: "", // blank for edit
     });
+    setProfilePicFile(null);
     setIsModalVisible(true);
   };
 
   const handleAdd = () => {
     setEditingUser(null);
     form.resetFields();
+    setProfilePicFile(null);
     setIsModalVisible(true);
+  };
+
+  const handleProfilePicChange = ({ fileList }) => {
+    const file = fileList[0]?.originFileObj;
+    setProfilePicFile(file);
   };
 
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
       if (editingUser) {
-        await updateUser(editingUser.id, { ...editingUser, ...values });
+        await updateUser(editingUser.userID, values, profilePicFile);
       } else {
         await addUser(values);
       }
+      await fetchUsers();
       setIsModalVisible(false);
       setEditingUser(null);
+      setProfilePicFile(null);
     } catch (error) {
-      console.error("Failed to save user:", error);
+      if (
+        error?.message?.toLowerCase().includes("username") &&
+        error?.message?.toLowerCase().includes("exist")
+      ) {
+        form.setFields([
+          {
+            name: "username",
+            errors: ["Username already exists"],
+          },
+        ]);
+      } else if (error.errorFields) {
+      } else {
+        console.error("Failed to save user:", error);
+      }
     }
   };
 
@@ -146,6 +171,13 @@ function ManageUsers() {
             ]}
           >
             <List.Item.Meta
+              avatar={
+                user.signedProfileUrl ? (
+                  <Avatar size={56} src={user.signedProfileUrl} />
+                ) : (
+                  <Avatar size={56} icon={<UserOutlined />} />
+                )
+              }
               title={user.username}
               description={`Role: ${user.roles
                 .map((role) => (role === "ROLE_ADMIN" ? "Admin" : "User"))
@@ -166,7 +198,10 @@ function ManageUsers() {
         title={editingUser ? "Edit User" : "Add User"}
         visible={isModalVisible}
         onOk={handleSave}
-        onCancel={() => setIsModalVisible(false)}
+        onCancel={() => {
+          setIsModalVisible(false);
+          setProfilePicFile(null);
+        }}
         okText="Save"
         cancelText="Cancel"
       >
@@ -189,6 +224,17 @@ function ManageUsers() {
             <Input />
           </Form.Item>
           <Form.Item
+            name="password"
+            label="Password"
+            rules={
+              editingUser
+                ? []
+                : [{ required: true, message: "Please enter the password" }]
+            }
+          >
+            <Input.Password placeholder={editingUser ? "Leave blank to keep current password" : ""} />
+          </Form.Item>
+          <Form.Item
             name="role"
             label="Role"
             rules={[{ required: true, message: "Please select a role" }]}
@@ -197,6 +243,29 @@ function ManageUsers() {
               <Option value="ROLE_ADMIN">Admin</Option>
               <Option value="ROLE_USER">User</Option>
             </Select>
+          </Form.Item>
+          <Form.Item label="Profile Picture">
+            <Upload
+              beforeUpload={() => false}
+              onChange={handleProfilePicChange}
+              maxCount={1}
+              accept="image/*"
+              showUploadList={{ showRemoveIcon: true }}
+              fileList={
+                profilePicFile
+                  ? [
+                      {
+                        uid: "-1",
+                        name: profilePicFile.name,
+                        status: "done",
+                        url: URL.createObjectURL(profilePicFile),
+                      },
+                    ]
+                  : []
+              }
+            >
+              <Button icon={<UploadOutlined />}>Select Image</Button>
+            </Upload>
           </Form.Item>
         </Form>
       </Modal>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { List, Dropdown, Menu, Button, Modal, Form, Input, Select } from "antd";
-import { EllipsisOutlined, ExclamationCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { List, Dropdown, Menu, Button, Modal, Form, Input, Select, Upload, Avatar } from "antd";
+import { EllipsisOutlined, ExclamationCircleOutlined, PlusOutlined, UploadOutlined, UserOutlined } from "@ant-design/icons";
 import useArtistStore from "../../zustand/store/ArtistStore";
 
 const { Option } = Select;
@@ -14,6 +14,7 @@ function ManageArtists() {
   const [filteredArtists, setFilteredArtists] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
     fetchAllArtists();
@@ -61,25 +62,34 @@ function ManageArtists() {
   const handleEdit = (artist) => {
     setEditingArtist(artist);
     form.setFieldsValue(artist);
+    setImageFile(null);
     setIsModalVisible(true);
   };
 
   const handleAdd = () => {
     setEditingArtist(null);
     form.resetFields();
+    setImageFile(null);
     setIsModalVisible(true);
+  };
+
+  const handleImageChange = ({ fileList }) => {
+    const file = fileList[0]?.originFileObj;
+    setImageFile(file);
   };
 
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
+      console.log("Form Values:", values);
       if (editingArtist) {
-        await updateArtist({ ...editingArtist, ...values });
+        await updateArtist({ ...editingArtist, ...values }, imageFile);
       } else {
-        await addArtist(values);
+        await addArtist(values, imageFile);
       }
       setIsModalVisible(false);
       setEditingArtist(null);
+      setImageFile(null);
     } catch (error) {
       console.error("Failed to save artist:", error);
     }
@@ -146,14 +156,14 @@ function ManageArtists() {
           >
             <List.Item.Meta
               avatar={
-                <img
-                  src={artist.signedProfileUrl}
-                  alt={artist.name}
-                  style={{ width: 50, height: 50, borderRadius: "50%" }}
-                />
+                artist.signedProfileUrl ? (
+                  <Avatar size={56} src={artist.signedProfileUrl} />
+                ) : (
+                  <Avatar size={56} icon={<UserOutlined />} />
+                )
               }
               title={artist.name}
-              description={`Country: ${artist.country}`}
+              description={`Country: ${artist.country}` || 'Country: None'}
             />
           </List.Item>
         )}
@@ -188,6 +198,29 @@ function ManageArtists() {
             rules={[{ required: true, message: "Please enter the artist's country" }]}
           >
             <Input />
+          </Form.Item>
+          <Form.Item label="Profile Picture">
+            <Upload
+              beforeUpload={() => false}
+              onChange={handleImageChange}
+              maxCount={1}
+              accept="image/*"
+              showUploadList={{ showRemoveIcon: true }}
+              fileList={
+                imageFile
+                  ? [
+                      {
+                        uid: "-1",
+                        name: imageFile.name,
+                        status: "done",
+                        url: URL.createObjectURL(imageFile),
+                      },
+                    ]
+                  : []
+              }
+            >
+              <Button icon={<UploadOutlined />}>Select Image</Button>
+            </Upload>
           </Form.Item>
         </Form>
       </Modal>

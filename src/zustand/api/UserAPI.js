@@ -99,7 +99,12 @@ export const addUser = async (user, profilePic) => {
  */
 export const updateUser = async (id, user, profilePic) => {
   const formData = new FormData();
-  formData.append("userDTO", JSON.stringify(user));
+  formData.append(
+    "user",
+    new Blob([JSON.stringify(user)], {
+      type: "application/json",
+    })
+  );
   if (profilePic) {
     formData.append("profilePic", profilePic);
   }

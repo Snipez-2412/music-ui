@@ -8,6 +8,7 @@ import MainPage from "./main/MainPage";
 import MusicPlayer from "./main/MusicPlayer";
 
 import HomePage from "./pages/HomePage";
+import UserProfile from "./pages/UserProfile"
 import PlaylistPage from "./Pages/PlaylistPage";
 import CreatePlaylist from "./pages/CreatePlaylist";
 import UpdatePlaylistPage from "./pages/UpdatePlaylistPage";
@@ -49,6 +50,7 @@ function App() {
         {/* Main */}
         <Route path="/" element={<MainPage />}>
           <Route index element={<HomePage />} />
+          <Route path="profile/:id" element={<UserProfile />} />
           <Route path="/search" element={<SearchResultsPage />} />
           <Route path="album/:title" element={<AlbumPage />} />
           <Route path="/create-playlist" element={<CreatePlaylist />} />

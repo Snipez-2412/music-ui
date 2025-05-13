@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { addToHistory } from "../api/HistoryAPI"; // Import the History API function
+import { addToHistory } from "../api/HistoryAPI";
 
 const useMusicPlayerStore = create((set, get) => ({
   isPlaying: false,
@@ -20,16 +20,12 @@ const useMusicPlayerStore = create((set, get) => ({
       if (isPlaying) {
         audioRef.pause();
         set({ isPlaying: false });
-        console.log("Paused playback");
       } else {
         audioRef.play().catch((error) => {
           console.error("Failed to play audio:", error);
         });
         set({ isPlaying: true });
-        console.log("Started playback");
       }
-    } else {
-      console.error("Audio element not found or not initialized yet");
     }
   },
 
@@ -68,63 +64,91 @@ const useMusicPlayerStore = create((set, get) => ({
   },
 
   nextSong: () => {
-    const { currentSong, songs, setCurrentSong } = get();
-    const currentIndex = songs.findIndex((song) => song.id === currentSong.id);
+    const { currentSong, songs, currentIndex } = get();
+    if (!currentSong || songs.length === 0) return;
+    
     const nextIndex = (currentIndex + 1) % songs.length;
-    setCurrentSong(songs[nextIndex]); // Automatically add the next song to history
-    console.log("Next Song Index:", nextIndex);
+    const nextSong = songs[nextIndex];
+    
+    set({ 
+      currentSong: nextSong,
+      currentIndex: nextIndex,
+      isPlaying: true 
+    });
+    
+    addToHistory(nextSong.songID || nextSong.id).catch(error => {
+      console.error("Failed to add song to history:", error);
+    });
   },
 
   previousSong: () => {
-    const { currentSong, songs, setCurrentSong } = get();
-    const currentIndex = songs.findIndex((song) => song.id === currentSong.id);
-    const previousIndex = (currentIndex - 1 + songs.length) % songs.length; // Loop back to the end
-    setCurrentSong(songs[previousIndex]); // Automatically add the previous song to history
-    console.log("Previous Song Index:", previousIndex);
+    const { currentSong, songs, currentIndex } = get();
+    if (!currentSong || songs.length === 0) return;
+    
+    const previousIndex = (currentIndex - 1 + songs.length) % songs.length;
+    const previousSong = songs[previousIndex];
+    
+    set({ 
+      currentSong: previousSong,
+      currentIndex: previousIndex,
+      isPlaying: true 
+    });
+    
+    addToHistory(previousSong.songID || previousSong.id).catch(error => {
+      console.error("Failed to add song to history:", error);
+    });
   },
 
   setCurrentSong: async (song) => {
+    if (!song) return;
+    
     const { songs } = get();
-    const index = songs.findIndex((s) => s.songID === song.songID);
+    const index = songs.findIndex((s) => s.songID === song.songID || s.id === song.id);
+    
     if (index !== -1) {
-      set({ currentIndex: index, currentSong: song });
-      console.log("Playlist:", songs); // Log the entire playlist
-      console.log("Now playing:", song); // Log the current song
-
-      // Add the song to history
-      try {
-        await addToHistory(song.songID || song.id);
-        console.log("Song added to history:", song.songID || song.id);
-      } catch (error) {
-        console.error("Failed to add song to history:", error);
-      }
+      set({ 
+        currentIndex: index, 
+        currentSong: song,
+        isPlaying: true 
+      });
     } else {
-      console.error("Song not found in the playlist:", song);
+      set({ 
+        currentSong: song,
+        currentIndex: 0,
+        isPlaying: true 
+      });
+    }
+
+    try {
+      await addToHistory(song.songID || song.id);
+    } catch (error) {
+      console.error("Failed to add song to history:", error);
     }
   },
 
   updateSongs: (newSongs) => {
+    if (!newSongs || newSongs.length === 0) return;
     set({ songs: newSongs });
   },
 
   setAudioRef: (ref) => {
-    console.log("Setting audioRef in Zustand store:", ref);
     set({ audioRef: ref });
   },
 
   resetPlaylist: (newSongs, songToPlay) => {
-    const index = newSongs.findIndex((song) => song.id === songToPlay.id);
+    if (!newSongs || !songToPlay) return;
+    
+    const index = newSongs.findIndex((song) => 
+      song.id === songToPlay.id || song.songID === songToPlay.songID
+    );
+    
     if (index !== -1) {
       set({
-        songs: newSongs, // Update the playlist
-        currentSong: songToPlay, // Set the new current song
-        currentIndex: index, // Update the index
-        isPlaying: true, // Start playing
+        songs: newSongs,
+        currentSong: songToPlay,
+        currentIndex: index,
+        isPlaying: true,
       });
-      console.log("Playlist reset with new songs:", newSongs);
-      console.log("Now playing:", songToPlay);
-    } else {
-      console.error("Song to play not found in the new playlist:", songToPlay);
     }
   },
 }));

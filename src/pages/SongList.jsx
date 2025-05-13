@@ -8,24 +8,24 @@ import { useLyricsStore } from "../zustand/store/LyricsStore";
 import { useUserStore } from "../zustand/store/UserStore";
 
 function SongList({ songs, isAlbumPage = false }) {
-  const { updateSongs, setCurrentSong } = useMusicPlayerStore();
+  const { setCurrentSong } = useMusicPlayerStore();
   const { likes, addLike, removeLike } = useLikeStore();
   const { lyrics, loadLyrics } = useLyricsStore();
   const currentUser = useUserStore((state) => state.currentUser);
 
   const [isLyricsModalVisible, setIsLyricsModalVisible] = useState(false);
   const [currentLyrics, setCurrentLyrics] = useState([]);
-  const [sortedSongs, setSortedSongs] = useState([...songs]); // State for sorted songs
-  const [isTitleAscending, setIsTitleAscending] = useState(true); // State for title sorting order
-  const [isAlbumAscending, setIsAlbumAscending] = useState(true); // State for album sorting order
+  const [sortedSongs, setSortedSongs] = useState([...songs]);
+  const [isTitleAscending, setIsTitleAscending] = useState(true);
+  const [isAlbumAscending, setIsAlbumAscending] = useState(true);
 
   useEffect(() => {
-    console.log("Songs passed to SongList:", songs);
-    updateSongs(songs);
-    setSortedSongs([...songs]); // Initialize sorted songs
-  }, [songs, updateSongs]);
+    setSortedSongs([...songs]);
+  }, [songs]);
 
   const handleSongClick = (song) => {
+    const { updateSongs } = useMusicPlayerStore.getState();
+    updateSongs(songs);
     setCurrentSong(song);
   };
 
@@ -38,7 +38,7 @@ function SongList({ songs, isAlbumPage = false }) {
       }
     });
     setSortedSongs(sorted);
-    setIsTitleAscending(!isTitleAscending); // Toggle title sorting order
+    setIsTitleAscending(!isTitleAscending);
   };
 
   const handleSortByAlbum = () => {
@@ -50,7 +50,7 @@ function SongList({ songs, isAlbumPage = false }) {
       }
     });
     setSortedSongs(sorted);
-    setIsAlbumAscending(!isAlbumAscending); // Toggle album sorting order
+    setIsAlbumAscending(!isAlbumAscending);
   };
 
   const handleLike = async (songId) => {
@@ -107,18 +107,16 @@ function SongList({ songs, isAlbumPage = false }) {
 
   return (
     <div className="song-list">
-      {/* Song List Header */}
       <div className="song-list-header">
         <span className="song-index">#</span>
         <span className="song-title" onClick={handleSortByTitle} style={{ cursor: "pointer" }}>
-          Title {isTitleAscending ? "▲" : "▼"} {/* Show sorting direction */}
+          Title {isTitleAscending ? "▲" : "▼"}
         </span>
         <span className="song-album" onClick={handleSortByAlbum} style={{ cursor: "pointer" }}>
-          Album {isAlbumAscending ? "▲" : "▼"} {/* Show sorting direction */}
+          Album {isAlbumAscending ? "▲" : "▼"}
         </span>
       </div>
 
-      {/* Song Rows */}
       {sortedSongs.map((song, index) => (
         <div key={song.id} className="song-row">
           <span className="song-index">{index + 1}</span>
@@ -135,7 +133,6 @@ function SongList({ songs, isAlbumPage = false }) {
         </div>
       ))}
 
-      {/* Lyrics Modal */}
       <Modal
         title="Song Lyrics"
         visible={isLyricsModalVisible}
