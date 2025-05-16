@@ -6,12 +6,14 @@ import useMusicPlayerStore from "../zustand/store/musicPlayerStore";
 import { useLikeStore } from "../zustand/store/LikeStore";
 import { useLyricsStore } from "../zustand/store/LyricsStore";
 import { useUserStore } from "../zustand/store/UserStore";
+import { usePlaylistSongStore } from "../zustand/store/PlaylistSongStore";
 
-function SongList({ songs, isAlbumPage = false }) {
+function SongList({ songs, playlistId, refreshSongs }) {
   const { setCurrentSong } = useMusicPlayerStore();
   const { likes, addLike, removeLike } = useLikeStore();
   const { lyrics, loadLyrics } = useLyricsStore();
   const currentUser = useUserStore((state) => state.currentUser);
+  const { playlistSongs, removeSongFromPlaylist } = usePlaylistSongStore();
 
   const [isLyricsModalVisible, setIsLyricsModalVisible] = useState(false);
   const [currentLyrics, setCurrentLyrics] = useState([]);
@@ -87,6 +89,19 @@ function SongList({ songs, isAlbumPage = false }) {
     }
   };
 
+  const handleRemoveFromPlaylist = async (songId) => {
+    try {
+      await removeSongFromPlaylist(playlistId, songId);
+      console.log("Song removed from playlist:", songId);
+
+      if (refreshSongs) {
+        refreshSongs();
+      }
+    } catch (error) {
+      console.error("Failed to remove song from playlist:", error);
+    }
+  };
+
   const handleCloseLyricsModal = () => {
     setIsLyricsModalVisible(false);
     setCurrentLyrics([]);
@@ -102,6 +117,15 @@ function SongList({ songs, isAlbumPage = false }) {
       <Menu.Item key="lyrics" onClick={() => handleViewLyrics(song.id || song.songID)}>
         View Lyrics
       </Menu.Item>
+      {playlistSongs.some((playlistSong) => playlistSong.songID === song.id) && (
+        <Menu.Item
+          key="remove"
+          onClick={() => handleRemoveFromPlaylist(song.id)}
+          danger
+        >
+          Remove from Playlist
+        </Menu.Item>
+      )}
     </Menu>
   );
 

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import * as playlistAPI from "../api/PlaylistAPI";
+import { useUserStore } from "./UserStore";
 
 export const usePlaylistStore = create((set, get) => ({
   playlists: [],
@@ -90,14 +91,22 @@ export const usePlaylistStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const updated = await playlistAPI.updatePlaylist(id, playlist);
+
+      console.log("Updated Playlist Response:", updated); // Log the updated playlist
+
+      // Update the store with the updated playlist
       set((state) => ({
         playlists: state.playlists.map((p) =>
           p.playlistID === id ? updated : p
         ),
         loading: false,
       }));
+
+      return true; // Indicate success
     } catch (error) {
+      console.error("Error updating playlist:", error);
       set({ error: error.message, loading: false });
+      return false; // Indicate failure
     }
   },
 

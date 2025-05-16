@@ -26,7 +26,6 @@ function PlaylistPage() {
 
   useEffect(() => {
     if (selectedPlaylist?.playlistID) {
-      console.log("Loading songs for playlist ID:", selectedPlaylist.playlistID);
       loadSongsInPlaylist(selectedPlaylist.playlistID);
     }
   }, [selectedPlaylist, loadSongsInPlaylist]);
@@ -40,14 +39,14 @@ function PlaylistPage() {
   }
 
   const handleUpdatePlaylist = () => {
-    navigate(`/playlist/update/${selectedPlaylist.playlistID}`);
+    navigate(`/playlist/update/${selectedPlaylist.name}`);
   };
 
   const handleDeletePlaylist = async () => {
     try {
       await deletePlaylist(selectedPlaylist.playlistID);
       message.success("Playlist deleted successfully!");
-      navigate("/"); 
+      navigate("/");
     } catch (error) {
       message.error("Failed to delete playlist.");
     }
@@ -73,6 +72,10 @@ function PlaylistPage() {
     signedFilePath: song.signedFilePath,
   }));
 
+  const refreshSongs = () => {
+    loadSongsInPlaylist(selectedPlaylist.playlistID); // Reload songs from the backend
+  };
+
   return (
     <div className="playlist-page">
       <div className="playlist-page-info">
@@ -95,7 +98,7 @@ function PlaylistPage() {
         </Dropdown>
       </div>
 
-      <SongList songs={normalizedSongs} />
+      <SongList songs={normalizedSongs} playlistId={selectedPlaylist.playlistID} refreshSongs={refreshSongs} />
     </div>
   );
 }

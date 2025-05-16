@@ -3,39 +3,24 @@ import { Form, Input, Button, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
 import { usePlaylistStore } from "../zustand/store/PlaylistStore";
-import { usePlaylistSongStore } from "../zustand/store/PlaylistSongStore";
-import useSongStore from "../zustand/store/SongStore"; // Import SongStore for fetching all songs
 
 function UpdatePlaylistPage() {
-  const { id } = useParams(); // Get playlist ID from the URL
+  const { name } = useParams(); // Get playlist name from the URL
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
   const updatePlaylist = usePlaylistStore((state) => state.updatePlaylist);
-  const loadPlaylistById = usePlaylistStore((state) => state.loadPlaylistById);
+  const loadPlaylistByName = usePlaylistStore((state) => state.loadPlaylistByName);
   const selectedPlaylist = usePlaylistStore((state) => state.selectedPlaylist);
 
-  const playlistSongs = usePlaylistSongStore((state) => state.playlistSongs);
-  const loadSongsInPlaylist = usePlaylistSongStore((state) => state.loadSongsInPlaylist);
-
-  const allSongs = useSongStore((state) => state.songs); // Fetch all songs
-  const fetchAllSongs = useSongStore((state) => state.fetchAllSongs);
-
-  const [selectedSongs, setSelectedSongs] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
-    // Fetch the playlist details, its songs, and all songs
-    (async () => {
-      try {
-        await loadPlaylistById(id); // Load the playlist details
-        await loadSongsInPlaylist(id); // Load the songs in the playlist
-        await fetchAllSongs(); // Fetch all songs
-      } catch (error) {
-        console.error("Error loading playlist or songs:", error);
-      }
-    })();
-  }, [id, loadPlaylistById, loadSongsInPlaylist, fetchAllSongs]);
+    // Fetch the playlist by name
+    if (name) {
+      loadPlaylistByName(name);
+    }
+  }, [name, loadPlaylistByName]);
 
   useEffect(() => {
     if (selectedPlaylist) {
@@ -44,35 +29,23 @@ function UpdatePlaylistPage() {
         name: selectedPlaylist.name,
         description: selectedPlaylist.description,
       });
-      setSelectedSongs(playlistSongs.map((song) => song.songId)); // Pre-select songs
       setSelectedImage(selectedPlaylist.coverImage); // Pre-select cover image
     }
-  }, [selectedPlaylist, playlistSongs, form]);
+  }, [selectedPlaylist, form]);
 
   const onFinish = async (values) => {
     const playlist = {
       name: values.name,
       description: values.description,
-      songIds: selectedSongs,
     };
 
-    const result = await updatePlaylist(id, playlist, selectedImage); // Update the playlist
+    const result = await updatePlaylist(selectedPlaylist.playlistID, playlist, selectedImage); // Update the playlist by ID
     if (result) {
       message.success("Playlist updated successfully!");
-      navigate(`/playlist/${id}`);
+      navigate(`/playlist/${playlist.name}`); // Redirect to the playlist page using the name
     } else {
       message.error("Failed to update playlist.");
     }
-  };
-
-  const handleAddSong = (songID) => {
-    if (!selectedSongs.includes(songID)) {
-      setSelectedSongs([...selectedSongs, songID]);
-    }
-  };
-
-  const handleRemoveSong = (songID) => {
-    setSelectedSongs(selectedSongs.filter((id) => id !== songID));
   };
 
   return (
@@ -125,57 +98,6 @@ function UpdatePlaylistPage() {
           >
             <Button icon={<UploadOutlined />}>Select Image</Button>
           </Upload>
-        </Form.Item>
-
-        <Form.Item
-          label={<span style={{ color: "white" }}>Select Songs</span>}
-          name="songs"
-        >
-          <div
-            style={{
-              maxHeight: 200,
-              overflowY: "auto",
-              padding: "8px",
-              border: "1px solid #444",
-              borderRadius: 8,
-            }}
-          >
-            {allSongs.map((song) => (
-              <div
-                key={song.songId}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "8px",
-                  color: "white",
-                }}
-              >
-                <span>{song.title}</span>
-                {selectedSongs.includes(song.songId) ? (
-                    <Button
-                    type="primary"
-                    onClick={() => handleAddSong(song.songId)}
-                    style={{
-                      backgroundColor: "#1db954", // Spotify green
-                      borderColor: "#1db954",
-                      color: "white",
-                    }}
-                  >
-                    +
-                    </Button>
-                ) : (
-                  <Button
-                    type="default"
-                    danger
-                    onClick={() => handleRemoveSong(song.songId)}
-                  >
-                    Remove
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
         </Form.Item>
 
         <Form.Item>

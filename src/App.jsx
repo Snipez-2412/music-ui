@@ -54,7 +54,7 @@ function App() {
           <Route path="/search" element={<SearchResultsPage />} />
           <Route path="album/:title" element={<AlbumPage />} />
           <Route path="/create-playlist" element={<CreatePlaylist />} />
-          <Route path="update-playlist/:id" element={<UpdatePlaylistPage />} />
+          <Route path="playlist/update/:id" element={<UpdatePlaylistPage />} />
           <Route path="playlist/:name" element={<PlaylistPage />} />
           <Route path="liked-page" element={<LikedPage />} />
         </Route>
