@@ -32,7 +32,6 @@ const useHistoryStore = create((set, get) => ({
     const { lastFetchTime, isLoading } = get();
     const now = Date.now();
     
-    // Don't fetch if we've fetched in the last 30 seconds and we're not loading
     if (lastFetchTime && now - lastFetchTime < 30000 && !isLoading) {
       return;
     }

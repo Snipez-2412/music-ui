@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useMemo } from "react";
 import Card from "../main/Card";
 import SongList from "../Pages/SongList";
 import useHistoryStore from "../zustand/store/HistoryStore";
-import { useUserStore } from "../zustand/store/UserStore"; // Import user store
+import { useUserStore } from "../zustand/store/UserStore";
 
 function HistoryList() {
   const {
@@ -16,9 +16,8 @@ function HistoryList() {
     fetchRecentArtists,
   } = useHistoryStore();
 
-  const currentUser = useUserStore((state) => state.currentUser); // Get the current user
+  const currentUser = useUserStore((state) => state.currentUser);
 
-  // Memoize the fetch functions
   const fetchHistory = useCallback(async () => {
     if (currentUser) {
       console.log("Fetching recent history...");
@@ -30,20 +29,31 @@ function HistoryList() {
     }
   }, [currentUser, fetchRecentSongs, fetchRecentAlbums, fetchRecentArtists]);
 
-  // Fetch history only when user changes
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory]);
 
-  // Memoize the song list
-  const songList = useMemo(() => {
-    if (recentSongs.length === 0) {
-      return <p>No recently played songs available.</p>;
-    }
-    return <SongList songs={recentSongs} />;
+  // Normalize the recentSongs data
+  const normalizedSongs = useMemo(() => {
+    return recentSongs.map((song) => ({
+      id: song.songID,
+      title: song.songTitle,
+      artistName: song.artistName,
+      albumTitle: song.albumTitle,
+      signedCoverUrl: song.signedCoverUrl,
+      signedFilePath: song.signedFilePath,
+    }));
   }, [recentSongs]);
 
-  // Memoize the album list
+  const songList = useMemo(() => {
+    if (normalizedSongs.length === 0) {
+      return <p>No recently played songs available.</p>;
+    }
+    return <SongList songs={normalizedSongs} />; 
+  }, [normalizedSongs]);
+  console.log("Recent Songs:", recentSongs);
+  console.log("Normal:", normalizedSongs);
+
   const albumList = useMemo(() => {
     if (recentAlbums.length === 0) {
       return <p>No recently played albums available.</p>;
@@ -59,7 +69,6 @@ function HistoryList() {
     ));
   }, [recentAlbums]);
 
-  // Memoize the artist list
   const artistList = useMemo(() => {
     if (recentArtists.length === 0) {
       return <p>No recently played artists available.</p>;
@@ -76,7 +85,7 @@ function HistoryList() {
   }, [recentArtists]);
 
   if (!currentUser) {
-    return <p>Please log in to view your history.</p>; // Render a message if the user is not logged in
+    return <p>Please log in to view your history.</p>;
   }
 
   return (
@@ -91,14 +100,10 @@ function HistoryList() {
           {songList}
 
           <h2>Recently Played Albums</h2>
-          <div className="album-history">
-            {albumList}
-          </div>
+          <div className="album-history">{albumList}</div>
 
           <h2>Recently Played Artists</h2>
-          <div className="artist-history">
-            {artistList}
-          </div>
+          <div className="artist-history">{artistList}</div>
         </>
       )}
     </div>

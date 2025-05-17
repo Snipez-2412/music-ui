@@ -4,7 +4,7 @@ export const addToHistory = async (songId) => {
   try {
     const response = await fetch(`${API_BASE}/add/songId/${songId}`, {
       method: "POST",
-      credentials: "include", // Include cookies for authentication
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -20,7 +20,7 @@ export const getRecentSongs = async (limit = 10) => {
   try {
     const response = await fetch(`${API_BASE}/songs?limit=${limit}`, {
       method: "GET",
-      credentials: "include", // Include cookies for authentication
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -38,7 +38,7 @@ export const getRecentAlbums = async (limit = 10) => {
   try {
     const response = await fetch(`${API_BASE}/albums?limit=${limit}`, {
       method: "GET",
-      credentials: "include", // Include cookies for authentication
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -56,7 +56,7 @@ export const getRecentArtists = async (limit = 10) => {
   try {
     const response = await fetch(`${API_BASE}/artists?limit=${limit}`, {
       method: "GET",
-      credentials: "include", // Include cookies for authentication
+      credentials: "include",
     });
 
     if (!response.ok) {

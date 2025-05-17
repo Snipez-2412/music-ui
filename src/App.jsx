@@ -13,6 +13,7 @@ import PlaylistPage from "./Pages/PlaylistPage";
 import CreatePlaylist from "./pages/CreatePlaylist";
 import UpdatePlaylistPage from "./pages/UpdatePlaylistPage";
 import AlbumPage from "./Pages/AlbumPage";
+import SongPage from "./pages/SongPage";
 import SearchResultsPage from "./pages/SearchResultsPage";
 import LikedPage from "./pages/LikedPage";
 
@@ -57,6 +58,7 @@ function App() {
           <Route path="playlist/update/:id" element={<UpdatePlaylistPage />} />
           <Route path="playlist/:name" element={<PlaylistPage />} />
           <Route path="liked-page" element={<LikedPage />} />
+          <Route path="song/:id" element={<SongPage />} />
         </Route>
         {/* Admin */}
         <Route path="/admin" element={<AdminLayout />}>

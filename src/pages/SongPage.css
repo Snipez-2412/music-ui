@@ -1,0 +1,31 @@
+.song-page {
+  padding: 20px;
+}
+
+.song-page-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.song-page-image {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.song-page-details {
+  flex: 1;
+}
+
+.song-page-title {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.song-page-artist,
+.song-page-album {
+  font-size: 16px;
+  color: #888;
+}

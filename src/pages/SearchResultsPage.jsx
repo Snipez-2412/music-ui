@@ -21,7 +21,7 @@ function SearchResultsPage() {
     if (item.type === "album") {
       navigate(`/album/${item.title}`);
     } else if (item.type === "song") {
-      navigate(`/songs/${item.title}`);
+      navigate(`/song/${item.id}`);
     }
   };
 

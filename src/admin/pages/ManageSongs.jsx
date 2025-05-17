@@ -148,7 +148,9 @@ function ManageSongs() {
   const handleSaveLyrics = async () => {
     try {
       const values = await lyricsForm.validateFields();
-      await editLyrics(editingSong.songID, values.lyrics);
+      const rawLyrics = values.lyrics; 
+      console.log("Saving raw lyrics:", rawLyrics); 
+      await editLyrics(editingSong.songID, rawLyrics); 
       setIsLyricsModalVisible(false);
       setEditingSong(null);
     } catch (error) {
