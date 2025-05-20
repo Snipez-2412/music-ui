@@ -66,35 +66,32 @@ export const usePlaylistStore = create((set, get) => ({
       console.log("User ID:", currentUser.userID);
       console.log("Playlist data:", playlist);
 
-      // Add userId to the playlist payload
       const playlistWithUserId = {
         ...playlist,
-        userId: currentUser.userID, // Add userId to the payload
+        userId: currentUser.userID,
       };
 
-      // Call the API to create the playlist
       const newPlaylist = await playlistAPI.addPlaylist(playlistWithUserId, image);
       set((state) => ({
-        playlists: [...state.playlists, newPlaylist], // Add the new playlist to the store
+        playlists: [...state.playlists, newPlaylist],
         loading: false,
       }));
-      return true; // Indicate success
+      return true; 
     } catch (error) {
       console.error("Error creating playlist:", error);
       set({ error: error.message, loading: false });
-      return false; // Indicate failure
+      return false;
     }
   },
 
   // Cập nhật playlist
-  updatePlaylist: async (id, playlist) => {
+  updatePlaylist: async (id, playlist, image) => {
     set({ loading: true, error: null });
     try {
-      const updated = await playlistAPI.updatePlaylist(id, playlist);
+      const updated = await playlistAPI.updatePlaylist(id, playlist, image);
 
-      console.log("Updated Playlist Response:", updated); // Log the updated playlist
+      console.log("Updated Playlist Response:", updated);
 
-      // Update the store with the updated playlist
       set((state) => ({
         playlists: state.playlists.map((p) =>
           p.playlistID === id ? updated : p
@@ -102,11 +99,11 @@ export const usePlaylistStore = create((set, get) => ({
         loading: false,
       }));
 
-      return true; // Indicate success
+      return true; 
     } catch (error) {
       console.error("Error updating playlist:", error);
       set({ error: error.message, loading: false });
-      return false; // Indicate failure
+      return false; 
     }
   },
 
@@ -124,7 +121,6 @@ export const usePlaylistStore = create((set, get) => ({
     }
   },
 
-  // Xoá playlist đang được chọn (nếu có)
   clearSelectedPlaylist: () => {
     set({ selectedPlaylist: null });
   },

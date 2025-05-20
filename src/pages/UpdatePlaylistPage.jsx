@@ -24,12 +24,11 @@ function UpdatePlaylistPage() {
 
   useEffect(() => {
     if (selectedPlaylist) {
-      // Pre-fill the form with playlist data
       form.setFieldsValue({
         name: selectedPlaylist.name,
         description: selectedPlaylist.description,
       });
-      setSelectedImage(selectedPlaylist.coverImage); // Pre-select cover image
+      setSelectedImage(selectedPlaylist.coverImage);
     }
   }, [selectedPlaylist, form]);
 
@@ -39,10 +38,10 @@ function UpdatePlaylistPage() {
       description: values.description,
     };
 
-    const result = await updatePlaylist(selectedPlaylist.playlistID, playlist, selectedImage); // Update the playlist by ID
+    const result = await updatePlaylist(selectedPlaylist.playlistID, playlist, selectedImage);
     if (result) {
       message.success("Playlist updated successfully!");
-      navigate(`/playlist/${playlist.name}`); // Redirect to the playlist page using the name
+      navigate(`/playlist/${playlist.name}`);
     } else {
       message.error("Failed to update playlist.");
     }

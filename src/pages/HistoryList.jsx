@@ -102,8 +102,7 @@ function HistoryList() {
           <h2>Recently Played Albums</h2>
           <div className="album-history">{albumList}</div>
 
-          <h2>Recently Played Artists</h2>
-          <div className="artist-history">{artistList}</div>
+          
         </>
       )}
     </div>

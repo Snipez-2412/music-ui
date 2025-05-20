@@ -90,6 +90,11 @@ body {
   margin-top: 15px;
 }
 
+.login p {
+  margin-top: 50px; /* Đẩy dòng chữ xuống thêm 5px */
+  margin: 0;
+}
+
 .login a {
   color: #1db954;
   text-decoration: none;

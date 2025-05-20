@@ -25,11 +25,10 @@ function MusicPlayer() {
   const singer = currentSong?.artistName;
   const cover = currentSong?.signedCoverUrl || "";
 
-  // Smoothly transition between songs when the src changes
   useEffect(() => {
     const player = audioRef.current?.audio?.current;
     if (player && audioSrc) {
-      player.src = audioSrc; // Update the audio source
+      player.src = audioSrc;
       player.play().catch((error) => {
         console.error("Failed to play audio:", error);
       });

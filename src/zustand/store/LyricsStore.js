@@ -12,10 +12,11 @@ export const useLyricsStore = create((set, get) => ({
 
   loadLyrics: async (songId) => {
     try {
-      const data = await fetchLyrics(songId)
-      // console.log("Fetched lyrics:", data);
-      if (data && data.content) {
-        set({ lyrics: data.content });
+      const data = await fetchLyrics(songId);
+      if (data && typeof data === "string") {
+        set({ lyrics: data }); // Store raw lyrics as plain text
+      } else if (data && data.content) {
+        set({ lyrics: data.content }); // Handle cases where the backend wraps lyrics in a "content" field
       } else {
         set({ lyrics: null });
       }
@@ -27,8 +28,8 @@ export const useLyricsStore = create((set, get) => ({
 
   createLyrics: async (songId, content) => {
     try {
-      const newLyrics = await addLyrics(songId, content);
-      set({ lyrics: newLyrics });
+      const newLyrics = await addLyrics(songId, content); // Send raw lyrics
+      set({ lyrics: newLyrics }); // Store raw lyrics
     } catch (err) {
       console.error("Failed to create lyrics", err);
     }
@@ -36,20 +37,11 @@ export const useLyricsStore = create((set, get) => ({
 
   editLyrics: async (songId, newContent) => {
     try {
-      const currentLyrics = get().lyrics; // Get the current lyrics from the store
-      if (currentLyrics) {
-        // If lyrics exist, update them
-        const updated = await updateLyrics(songId, newContent);
-        console.log("Updated lyrics:", updated);
-        set({ lyrics: updated });
-      } else {
-        // If no lyrics exist, add them
-        const added = await addLyrics(songId, { content: newContent });
-        console.log("Added lyrics:", added);
-        set({ lyrics: added });
-      }
+      const updated = await updateLyrics(songId, newContent); // Send raw lyrics
+      console.log("Updated lyrics:", updated);
+      set({ lyrics: updated }); // Store raw lyrics
     } catch (err) {
-      console.error("Failed to update or add lyrics", err);
+      console.error("Failed to update lyrics", err);
     }
   },
 

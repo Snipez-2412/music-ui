@@ -106,15 +106,29 @@ export const addPlaylist = async (playlist, image = null) => {
  * @param {Object} playlist
  * @returns {Promise<Object>}
  */
-export const updatePlaylist = async (id, playlist) => {
+export const updatePlaylist = async (id, playlist, image = null) => {
+  const formData = new FormData();
+
+  const playlistPayload = {
+    name: playlist.name,
+    description: playlist.description,
+  };
+
+  formData.append(
+    "playlist",
+    new Blob([JSON.stringify(playlistPayload)], {
+      type: "application/json",
+    })
+  );
+
+  if (image) {
+    formData.append("image", image);
+  }
+
   const res = await fetch(`${BASE_URL}/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      // No token needed here as the session will handle authentication
-    },
-    credentials: 'include', // Ensures that cookies/session are included in the request
-    body: JSON.stringify(playlist),
+    credentials: 'include', 
+    body: formData,
   });
 
   if (!res.ok) throw new Error("Failed to update playlist");

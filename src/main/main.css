@@ -43,25 +43,6 @@ body {
   padding-right: 20px; /* Đẩy toàn bộ phần bên phải sang trái */
 }
 
-.nav-item {
-  font-size: 24px;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  transition: background-color 0.3s ease-in-out;
-  position: relative;
-  left: -20px; /* Dịch icon user sang trái */
-}
-
-.nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
 .main {
   display: flex;
   height: calc(100vh - 70px - 115px); /* Điều chỉnh để fit với navbar */
@@ -493,7 +474,34 @@ a:hover {
 }
 
 .nav-item {
-  margin-left: 1rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  margin-top: 30px;
+}
+
+.nav-item::after {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: -10px;
+  width: 36px;
+  height: 36px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: -1;
+}
+
+.nav-item:hover::after {
+  opacity: 1;
 }
 
 @media (max-width: 1000px) {
