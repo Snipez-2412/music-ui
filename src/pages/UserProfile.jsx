@@ -7,7 +7,6 @@ import './UserProfilePage.css';
 const UserProfilePage = () => {  
   const { id } = useParams();
   
-  // More specific selector to prevent unnecessary re-renders
   const currentUser = useUserStore(useCallback(state => state.currentUser, []));
   const updateUser = useUserStore(useCallback(state => state.updateUser, []));
 
@@ -30,7 +29,6 @@ const UserProfilePage = () => {
     };
   }, [currentUser?.username, currentUser?.email, currentUser?.signedProfileUrl]);
 
-  // Load user details when memoized details change
   useEffect(() => {
     if (memoizedUserDetails && JSON.stringify(memoizedUserDetails) !== JSON.stringify(userDetails)) {
       setUserDetails(memoizedUserDetails);

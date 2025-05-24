@@ -36,8 +36,8 @@ function ManageAlbums() {
       const lowerCaseQuery = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (album) =>
-          album.title.toLowerCase().includes(lowerCaseQuery) || // Match album title
-          album.artistName.toLowerCase().includes(lowerCaseQuery) // Match artist name
+          album.title.toLowerCase().includes(lowerCaseQuery) ||
+          album.artistName.toLowerCase().includes(lowerCaseQuery)
       );
     }
 
@@ -60,7 +60,15 @@ function ManageAlbums() {
       okText: "Yes, Delete",
       okType: "danger",
       cancelText: "Cancel",
-      onOk: () => deleteAlbum(id),
+      onOk: async () => {
+        try {
+          await deleteAlbum(id);
+          await fetchAllAlbums(); 
+          console.log("Album deleted successfully");
+        } catch (error) {
+          console.error("Failed to delete album:", error);
+        }
+      },
     });
   };
 
@@ -132,6 +140,10 @@ function ManageAlbums() {
           allowClear
           onChange={handleArtistFilterChange}
           style={{ width: 200 }}
+          showSearch
+          filterOption={(input, option) =>
+            option.children.toLowerCase().includes(input.toLowerCase())
+          }
         >
           {artists.map((artist) => (
             <Option key={artist.artistID} value={artist.artistID}>
@@ -193,7 +205,7 @@ function ManageAlbums() {
           <Form.Item
             name="title"
             label="Album Title"
-            rules={[{ required: false, message: "Please enter the album title" }]}
+            rules={[{ required: true, message: "Please enter the album title" }]}
           >
             <Input />
           </Form.Item>
@@ -217,6 +229,16 @@ function ManageAlbums() {
               ))}
             </Select>
           </Form.Item>
+
+          {/* New Release Date Field */}
+          <Form.Item
+            name="releaseDate"
+            label="Release Date"
+            rules={[{ required: true, message: "Please select a release date" }]}
+          >
+            <Input type="date" />
+          </Form.Item>
+
           <Form.Item label="Cover Image">
             <Upload
               beforeUpload={() => false}

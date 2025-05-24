@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import { useNavigate } from "react-router-dom";
 import "./Signup.css";
 
 function SignUp() {
@@ -13,7 +13,7 @@ function SignUp() {
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [signupError, setSignupError] = useState("");
 
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const validateUsername = () => {
     if (!username.trim()) {
@@ -24,7 +24,7 @@ function SignUp() {
   };
 
   const validatePassword = () => {
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/; // Updated regex: 1 uppercase, 1 number
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/;
     if (!password) {
       setPasswordError("Password cannot be empty.");
     } else if (!passwordRegex.test(password)) {
@@ -63,7 +63,7 @@ function SignUp() {
         },
         body: JSON.stringify({
           username,
-          email: email || null, // Make email optional
+          email: email || null,
           password,
         }),
       });
@@ -76,7 +76,7 @@ function SignUp() {
       const createdUser = await response.json();
       alert("Sign-up successful!");
       console.log("Created user:", createdUser);
-      navigate("/login"); // Use navigate to redirect to the login page
+      navigate("/login");
     } catch (error) {
       console.error("Signup failed:", error);
       setSignupError(error.message);

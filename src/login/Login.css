@@ -32,13 +32,11 @@ body {
   border-radius: 4px;
 }
 
-/* Form Control Styles */
 .MuiFormControl-root {
   background-color: var(--spotify-black);
   border-radius: 8px;
 }
 
-/* Paper styles for SignInPage */
 .MuiPaper-root {
   background-color: var(--spotify-black);
   color: var(--spotify-white);

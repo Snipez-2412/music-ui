@@ -51,7 +51,7 @@ function MusicPlayer() {
       {/* Audio Player */}
       <H5AudioPlayer
         ref={audioRef}
-        src={audioSrc} // Bind the src directly
+        src={audioSrc} 
         autoPlay={true}
         showSkipControls={true}
         showJumpControls={false}
@@ -67,7 +67,7 @@ function MusicPlayer() {
         onClickNext={nextSong}
         onClickPrevious={previousSong}
         onVolumeChange={(e) => changeVolume(e.target.volume * 100)}
-        onError={(e) => console.error("Audio player error:", e)} // Log errors
+        onError={(e) => console.error("Audio player error:", e)}
       />
     </div>
   );

@@ -1,15 +1,15 @@
 .album-page {
   color: white;
-  padding: 20px; /* Ensure consistent padding */
-  width: 100%; /* Match the width of the playlist page */
-  box-sizing: border-box; /* Include padding in the width */
+  padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .album-info {
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 20px; /* Add spacing below the album info */
+  margin-bottom: 20px;
 }
 
 .album-image {

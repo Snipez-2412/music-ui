@@ -12,7 +12,6 @@ function LikedSongs() {
   const { fetchSongById } = useSongStore();
   const [likedSongs, setLikedSongs] = useState([]);
 
-  // Fetch likes when the component mounts or when the current user changes
   useEffect(() => {
     const fetchUserLikes = async () => {
       if (currentUser?.userID) {
@@ -23,7 +22,6 @@ function LikedSongs() {
     fetchUserLikes();
   }, [currentUser, fetchLikes]);
 
-  // Fetch song details whenever the `likes` array updates
   useEffect(() => {
     const fetchLikedSongs = async () => {
       if (likes.length > 0) {

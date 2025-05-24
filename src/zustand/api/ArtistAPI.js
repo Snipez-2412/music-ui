@@ -25,6 +25,7 @@ export const addArtist = async (artist, imageFile) => {
     new Blob([JSON.stringify(artist)], { type: "application/json" }
   ));
   if (imageFile) formData.append("image", imageFile);
+  console.log("Artist payload being sent:", artist); 
 
   const res = await fetch(BASE_URL, {
     method: "POST",

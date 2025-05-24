@@ -1,7 +1,7 @@
 /* SearchResultsPage.css */
 .search-results-container {
   padding: 20px;
-  background-color: #121212; /* dark background */
+  background-color: #121212;
   min-height: 100vh;
   color: black;
 }

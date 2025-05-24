@@ -56,7 +56,15 @@ function ManageUsers() {
       okText: "Yes, Delete",
       okType: "danger",
       cancelText: "Cancel",
-      onOk: () => removeUser(id),
+      onOk: async () => {
+        try {
+          await removeUser(id); 
+          await fetchUsers(); 
+          console.log("User deleted successfully .");
+        } catch (error) {
+          console.error("Failed to delete user:", error);
+        }
+      },
     });
   };
 
@@ -66,7 +74,7 @@ function ManageUsers() {
       username: user.username,
       email: user.email,
       role: user.roles,
-      password: "", // blank for edit
+      password: "",
     });
     setProfilePicFile(null);
     setIsModalVisible(true);
@@ -146,6 +154,10 @@ function ManageUsers() {
           allowClear
           onChange={handleRoleFilterChange}
           style={{ width: 200 }}
+          showSearch
+          filterOption={(input, option) =>
+            option.children.toLowerCase().includes(input.toLowerCase())
+          }
         >
           <Option value="ROLE_ADMIN">Admin</Option>
           <Option value="ROLE_USER">User</Option>

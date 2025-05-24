@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import libraryIcon from "../assets/library_icon.png";
-import likedIcon from "../assets/liked.jpg"; // Import the liked playlist image
+import likedIcon from "../assets/liked.jpg";
 import Playlist from "./Playlist";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { usePlaylistStore } from "../zustand/store/PlaylistStore";
-import { useUserStore } from "../zustand/store/UserStore"; // Import UserStore
+import { useUserStore } from "../zustand/store/UserStore";
 
 function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -13,7 +13,7 @@ function Sidebar() {
 
   const playlists = usePlaylistStore((state) => state.playlists);
   const loadPlaylists = usePlaylistStore((state) => state.loadPlaylists);
-  const currentUser = useUserStore((state) => state.currentUser); // Get current user
+  const currentUser = useUserStore((state) => state.currentUser);
 
   const navigate = useNavigate();
 
@@ -37,7 +37,7 @@ function Sidebar() {
   };
 
   const goToLikedSongs = () => {
-    navigate("/liked-page"); // Navigate to the liked songs page
+    navigate("/liked-page");
   };
 
   return (

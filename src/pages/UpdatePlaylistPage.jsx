@@ -84,14 +84,14 @@ function UpdatePlaylistPage() {
           name="image"
         >
           <Upload
-            beforeUpload={() => false} // Prevent automatic upload
+            beforeUpload={() => false}
             maxCount={1}
             onChange={(info) => {
               if (info.file.status === "removed") {
-                setSelectedImage(null); // Handle file removal
+                setSelectedImage(null);
               } else {
                 const file = info.file.originFileObj || info.file;
-                setSelectedImage(file); // Store the selected file
+                setSelectedImage(file);
               }
             }}
           >

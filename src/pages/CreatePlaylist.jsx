@@ -21,7 +21,7 @@ function CreatePlaylistPage() {
   }, []);
 
   const onFinish = async (values) => {
-    console.log("Selected image file before submission:", selectedImage); // Debug log
+    console.log("Selected image file before submission:", selectedImage);
 
     const playlist = {
       name: values.name,
@@ -29,7 +29,7 @@ function CreatePlaylistPage() {
       songIds: selectedSongs,
     };
 
-    const result = await addPlaylist(playlist, selectedImage); // Pass the selected image
+    const result = await addPlaylist(playlist, selectedImage);
     if (result) {
       message.success("Playlist created successfully!");
       navigate("/");
@@ -85,16 +85,16 @@ function CreatePlaylistPage() {
           name="image"
         >
           <Upload
-            beforeUpload={() => false} // Prevent automatic upload
+            beforeUpload={() => false}
             maxCount={1}
             onChange={(info) => {
-              console.log("Upload info:", info); // Debug log
+              console.log("Upload info:", info);
               if (info.file.status === "removed") {
-                setSelectedImage(null); // Handle file removal
+                setSelectedImage(null);
               } else {
-                const file = info.file.originFileObj || info.file; // Fallback to `info.file` if `originFileObj` is undefined
-                setSelectedImage(file); // Store the selected file
-                console.log("Selected image file:", file); // Debug log
+                const file = info.file.originFileObj || info.file; 
+                setSelectedImage(file); 
+                console.log("Selected image file:", file); 
               }
             }}
           >

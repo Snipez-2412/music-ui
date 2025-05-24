@@ -55,7 +55,15 @@ function ManageArtists() {
       okText: "Yes, Delete",
       okType: "danger",
       cancelText: "Cancel",
-      onOk: () => deleteArtist(id),
+      onOk: async () => {
+        try {
+          await deleteArtist(id);
+          await fetchAllArtists();
+          console.log("Artist deleted successfully ");
+        } catch (error) {
+          console.error("Failed to delete artist:", error);
+        }
+      },
     });
   };
 
@@ -100,7 +108,7 @@ function ManageArtists() {
       <Menu.Item key="edit" onClick={() => handleEdit(artist)}>
         Edit
       </Menu.Item>
-      <Menu.Item key="delete" danger onClick={() => handleDelete(artist.id)}>
+      <Menu.Item key="delete" danger onClick={() => handleDelete(artist.artistID)}>
         Delete
       </Menu.Item>
     </Menu>
@@ -127,6 +135,10 @@ function ManageArtists() {
           allowClear
           onChange={handleCountryFilterChange}
           style={{ width: 200 }}
+          showSearch
+          filterOption={(input, option) =>
+            option.children.toLowerCase().includes(input.toLowerCase())
+          }
         >
           {[...new Set(artists.map((artist) => artist.country))].map((country) => (
             <Option key={country} value={country}>

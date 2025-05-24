@@ -13,7 +13,7 @@ function ManageSongs() {
   const { songs, fetchAllSongs, updateSong, deleteSong, addSong } = useSongStore();
   const { albums, fetchAllAlbums } = useAlbumStore();
   const { artists, fetchAllArtists } = useArtistStore();
-  const { lyrics, loadLyrics, editLyrics, removeLyrics } = useLyricsStore();
+  const { lyrics, loadLyrics, editLyrics, removeLyrics, createLyrics } = useLyricsStore();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isLyricsModalVisible, setIsLyricsModalVisible] = useState(false);
@@ -81,7 +81,15 @@ function ManageSongs() {
       okText: "Yes, Delete",
       okType: "danger",
       cancelText: "Cancel",
-      onOk: () => deleteSong(id),
+      onOk: async () => {
+        try {
+          await deleteSong(id);
+          await fetchAllSongs();
+          console.log("Song deleted successfully");
+        } catch (error) {
+          console.error("Failed to delete song:", error);
+        }
+      },
     });
   };
 
@@ -91,7 +99,6 @@ function ManageSongs() {
     setAudioFile(null);
     form.setFieldsValue(song);
 
-    // Clear file input elements
     const coverInput = document.querySelector('input[type="file"][accept="image/*"]');
     const audioInput = document.querySelector('input[type="file"][accept="audio/mp3,audio/mpeg"]');
     if (coverInput) coverInput.value = null;
@@ -148,9 +155,17 @@ function ManageSongs() {
   const handleSaveLyrics = async () => {
     try {
       const values = await lyricsForm.validateFields();
-      const rawLyrics = values.lyrics; 
-      console.log("Saving raw lyrics:", rawLyrics); 
-      await editLyrics(editingSong.songID, rawLyrics); 
+      const rawLyrics = values.lyrics;
+      console.log("Saving raw lyrics:", rawLyrics);
+
+      if (lyrics) {
+        console.log("Updating existing lyrics...");
+        await editLyrics(editingSong.songID, rawLyrics);
+      } else {
+        console.log("Creating new lyrics...");
+        await createLyrics(editingSong.songID, rawLyrics);
+      }
+
       setIsLyricsModalVisible(false);
       setEditingSong(null);
     } catch (error) {
@@ -241,6 +256,10 @@ function ManageSongs() {
           allowClear
           onChange={handleArtistFilterChange}
           style={{ width: 200 }}
+          showSearch
+          filterOption={(input, option) =>
+            option.children.toLowerCase().includes(input.toLowerCase())
+          }
         >
           {artists.map((artist) => (
             <Option key={artist.artistID} value={artist.artistID}>
@@ -254,6 +273,10 @@ function ManageSongs() {
           allowClear
           onChange={handleAlbumFilterChange}
           style={{ width: 200 }}
+          showSearch
+          filterOption={(input, option) =>
+            option.children.toLowerCase().includes(input.toLowerCase())
+          }
         >
           {filteredAlbums.map((album) => (
             <Option key={album.albumID} value={album.albumID}>
